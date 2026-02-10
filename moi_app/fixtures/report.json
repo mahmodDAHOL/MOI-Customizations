@@ -1,0 +1,546 @@
+[
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2026-01-20 15:29:00.756439",
+  "module": "MOI",
+  "name": "Foreign Media Report",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Visitors",
+  "reference_report": null,
+  "report_name": "Foreign Media Report",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Foreign Media Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "System Manager"
+   },
+   {
+    "parent": "Foreign Media Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Foreign-Workspace"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2025-10-05 11:04:31.923566",
+  "module": "MOI",
+  "name": "bank",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Account",
+  "reference_report": "bank",
+  "report_name": "bank",
+  "report_script": null,
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "bank",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Auditor"
+   },
+   {
+    "parent": "bank",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Purchase User"
+   },
+   {
+    "parent": "bank",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   },
+   {
+    "parent": "bank",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "bank",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Sales User"
+   },
+   {
+    "parent": "bank",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee Self Service"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{}",
+  "letter_head": null,
+  "modified": "2025-10-22 20:16:50.526946",
+  "module": "MOI",
+  "name": "Performance and Accomplishment MOI 2",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Media Production",
+  "reference_report": null,
+  "report_name": "Performance and Accomplishment MOI 2",
+  "report_script": "def execute(filters=None):\n    columns = [\n        {\"label\": \"Parent\", \"fieldname\": \"parent\", \"fieldtype\": \"Link\", \"options\": \"Media Production\", \"width\": 200},\n        {\"label\": \"Program Name\", \"fieldname\": \"program_name\", \"fieldtype\": \"Data\", \"width\": 200},\n        {\"label\": \"Type\", \"fieldname\": \"type\", \"fieldtype\": \"Data\", \"width\": 150},\n        {\"label\": \"Weight\", \"fieldname\": \"weight\", \"fieldtype\": \"Float\", \"width\": 100},\n        {\"label\": \"Count\", \"fieldname\": \"count\", \"fieldtype\": \"Int\", \"width\": 100},\n        {\"label\": \"Title\", \"fieldname\": \"title\", \"fieldtype\": \"Data\", \"width\": 200},\n        {\"label\": \"Link\", \"fieldname\": \"link\", \"fieldtype\": \"Data\", \"width\": 200},\n        {\"label\": \"Date\", \"fieldname\": \"date\", \"fieldtype\": \"Date\", \"width\": 120}\n    ]\n\n    data = frappe.get_all(\n        \"Media Production Child\",\n        fields=[\"parent\", \"program_name\", \"type\", \"weight\", \"count\", \"title\", \"link\", \"date\"],\n        order_by=\"creation desc\"\n    )\n\n    return columns, data\n",
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Performance and Accomplishment MOI 2",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "System Manager"
+   },
+   {
+    "parent": "Performance and Accomplishment MOI 2",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2026-01-21 09:25:26.974469",
+  "module": "MOI",
+  "name": "Task KPI Report",
+  "prepared_report": 0,
+  "query": "SELECT 'Total Tasks' AS kpi, COUNT(name) AS value\r\nFROM `tabTask`\r\n\r\nUNION ALL\r\nSELECT 'Completed Tasks' AS kpi, COUNT(name) AS value\r\nFROM `tabTask`\r\nWHERE status = 'Completed'\r\n\r\nUNION ALL\r\nSELECT 'Open Tasks' AS kpi, COUNT(name) AS value\r\nFROM `tabTask`\r\nWHERE status != 'Completed'\r\n\r\nUNION ALL\r\nSELECT 'Overdue Tasks' AS kpi, COUNT(name) AS value\r\nFROM `tabTask`\r\nWHERE status != 'Completed'\r\n  AND exp_end_date IS NOT NULL\r\n  AND exp_end_date < CURDATE();\r\n",
+  "ref_doctype": "Task",
+  "reference_report": null,
+  "report_name": "Task KPI Report",
+  "report_script": null,
+  "report_type": "Query Report",
+  "roles": [
+   {
+    "parent": "Task KPI Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee Self Service"
+   },
+   {
+    "parent": "Task KPI Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Projects Manager"
+   },
+   {
+    "parent": "Task KPI Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Projects User"
+   },
+   {
+    "parent": "Task KPI Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "System Manager"
+   },
+   {
+    "parent": "Task KPI Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee"
+   },
+   {
+    "parent": "Task KPI Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Financial_affairs"
+   },
+   {
+    "parent": "Task KPI Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Finance-Directorate"
+   },
+   {
+    "parent": "Task KPI Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Legal-affairs"
+   },
+   {
+    "parent": "Task KPI Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Shared-services"
+   },
+   {
+    "parent": "Task KPI Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "General-Directorate-of-Governorates"
+   },
+   {
+    "parent": "Task KPI Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Government media"
+   },
+   {
+    "parent": "Task KPI Report",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Security and protection"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [
+   {
+    "fieldname": "name",
+    "fieldtype": "Link",
+    "label": "ID",
+    "options": "Task",
+    "parent": "Leaf Tasks",
+    "parentfield": "columns",
+    "parenttype": "Report",
+    "width": 0
+   },
+   {
+    "fieldname": "subject",
+    "fieldtype": "Data",
+    "label": "Task",
+    "options": null,
+    "parent": "Leaf Tasks",
+    "parentfield": "columns",
+    "parenttype": "Report",
+    "width": 0
+   },
+   {
+    "fieldname": "status",
+    "fieldtype": "Data",
+    "label": "Status",
+    "options": null,
+    "parent": "Leaf Tasks",
+    "parentfield": "columns",
+    "parenttype": "Report",
+    "width": 0
+   },
+   {
+    "fieldname": "description",
+    "fieldtype": "Data",
+    "label": "Description",
+    "options": null,
+    "parent": "Leaf Tasks",
+    "parentfield": "columns",
+    "parenttype": "Report",
+    "width": 0
+   }
+  ],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [
+   {
+    "default": null,
+    "fieldname": "parent_task",
+    "fieldtype": "Data",
+    "label": "Category",
+    "mandatory": 0,
+    "options": null,
+    "parent": "Leaf Tasks",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   }
+  ],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{}",
+  "letter_head": null,
+  "modified": "2026-01-25 09:45:51.895701",
+  "module": "MOI",
+  "name": "Leaf Tasks",
+  "prepared_report": 0,
+  "query": "select  name , subject , status, description  from tabTask",
+  "ref_doctype": "Task",
+  "reference_report": null,
+  "report_name": "Leaf Tasks",
+  "report_script": null,
+  "report_type": "Query Report",
+  "roles": [
+   {
+    "parent": "Leaf Tasks",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee Self Service"
+   },
+   {
+    "parent": "Leaf Tasks",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Projects Manager"
+   },
+   {
+    "parent": "Leaf Tasks",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Projects User"
+   },
+   {
+    "parent": "Leaf Tasks",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "System Manager"
+   },
+   {
+    "parent": "Leaf Tasks",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee"
+   },
+   {
+    "parent": "Leaf Tasks",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Financial_affairs"
+   },
+   {
+    "parent": "Leaf Tasks",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Finance-Directorate"
+   },
+   {
+    "parent": "Leaf Tasks",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Legal-affairs"
+   },
+   {
+    "parent": "Leaf Tasks",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Shared-services"
+   },
+   {
+    "parent": "Leaf Tasks",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "General-Directorate-of-Governorates"
+   },
+   {
+    "parent": "Leaf Tasks",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Government media"
+   },
+   {
+    "parent": "Leaf Tasks",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Security and protection"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{}",
+  "letter_head": null,
+  "modified": "2026-02-10 14:46:28.673678",
+  "module": "MOI",
+  "name": "الفرز الأولي للمتقدمين",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Job Applicant",
+  "reference_report": null,
+  "report_name": "الفرز الأولي للمتقدمين",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "parent": "الفرز الأولي للمتقدمين",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "HR User"
+   },
+   {
+    "parent": "الفرز الأولي للمتقدمين",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee Self Service"
+   },
+   {
+    "parent": "الفرز الأولي للمتقدمين",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Planning-Division-Head"
+   },
+   {
+    "parent": "الفرز الأولي للمتقدمين",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Planning-Section-Head"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": "{}",
+  "letter_head": null,
+  "modified": "2026-02-02 11:24:15.207735",
+  "module": "MOI",
+  "name": "تقرير مقابلة",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Interview",
+  "reference_report": null,
+  "report_name": "تقرير مقابلة",
+  "report_script": null,
+  "report_type": "Report Builder",
+  "roles": [
+   {
+    "parent": "تقرير مقابلة",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "HR User"
+   },
+   {
+    "parent": "تقرير مقابلة",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee Self Service"
+   },
+   {
+    "parent": "تقرير مقابلة",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Planning-Division-Head"
+   },
+   {
+    "parent": "تقرير مقابلة",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Planning-Section-Head"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2026-01-13 14:34:10.199454",
+  "module": "MOI",
+  "name": "Candidate Ranking",
+  "prepared_report": 1,
+  "query": "{\r\n  \"filters\": [\r\n    [\"Interview\", \"arange_rating\", \">\", 3.5]\r\n  ],\r\n  \"fields\": [\r\n    [\"interview_round\", \"Interview\"],\r\n    [\"job_applicant\", \"Interview\"],\r\n    [\"job_opening\", \"Interview\"],\r\n    [\"designation\", \"Interview\"],\r\n    [\"status\", \"Interview\"],\r\n    [\"from_time\", \"Interview\"],\r\n    [\"to_time\", \"Interview\"],\r\n    [\"rating\", \"Interview\"]\r\n  ],\r\n  \"order_by\": \"`tabInterview`.`modified` desc\",\r\n  \"add_totals_row\": false,\r\n  \"page_length\": 2500,\r\n  \"column_widths\": {\r\n    \"interview_round\": 150,\r\n    \"job_applicant\": 180,\r\n    \"job_opening\": 180,\r\n    \"designation\": 150,\r\n    \"status\": 120,\r\n    \"from_time\": 140,\r\n    \"to_time\": 140,\r\n    \"rating\": 100\r\n  },\r\n  \"group_by\": null\r\n}",
+  "ref_doctype": "Interview",
+  "reference_report": null,
+  "report_name": "Candidate Ranking",
+  "report_script": null,
+  "report_type": "Query Report",
+  "roles": [
+   {
+    "parent": "Candidate Ranking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Interviewer"
+   },
+   {
+    "parent": "Candidate Ranking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "System Manager"
+   },
+   {
+    "parent": "Candidate Ranking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "HR User"
+   },
+   {
+    "parent": "Candidate Ranking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "HR Manager"
+   },
+   {
+    "parent": "Candidate Ranking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "hr-viewer"
+   }
+  ],
+  "timeout": 0
+ }
+]

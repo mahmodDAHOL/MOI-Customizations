@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2026-01-05 16:14:43.976551",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-01-05 16:14:43.976551",
+ "modified_by": "Administrator",
+ "module": "Website Statistics",
+ "name": "moi-website-statisti",
+ "owner": "Administrator",
+ "page_name": "moi-website-statisti",
+ "roles": [
+  {
+   "role": "All"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "MOI Website Statistics"
+}

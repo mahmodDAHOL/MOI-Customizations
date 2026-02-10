@@ -1,0 +1,19 @@
+{
+ "content": null,
+ "creation": "2026-01-07 14:30:33.577331",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-01-07 14:37:40.488814",
+ "modified_by": "Administrator",
+ "module": "moi_app",
+ "name": "weekly_report",
+ "owner": "Administrator",
+ "page_name": "weekly_report",
+ "roles": [],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Weekly Report"
+}
