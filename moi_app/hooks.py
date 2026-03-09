@@ -43,7 +43,7 @@ app_license = "mit"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {"Leave Application" : "public/js/leave_application.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -121,7 +121,10 @@ jinja = {
 # Permissions evaluated in scripted ways
 
 permission_query_conditions = {
-    "Asset": "moi_app.permissions.get_permission_query_conditions_for_asset"
+    "Asset": "moi_app.permissions.get_permission_query_conditions_for_asset",
+    "Employee": "moi_app.permissions.material_request_query_condition",
+    "Employee": "moi_app.permissions.employee_query_condition",
+    # "Employee": "moi_app.permissions.get_permission_query_conditions_for_employee"
 }
 #
 # has_permission = {
@@ -132,20 +135,18 @@ permission_query_conditions = {
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-# 	"ToDo": "custom_app.overrides.CustomToDo"
-# }
-
+override_doctype_class = {
+	"Leave Application": "moi_app.custom.leave_application.LeaveApplicationThai"
+}
 # Document Events
 # ---------------
 # Hook on document methods and events
 
 doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
+    # Optional: Cleanup during migration period (TEMPORARY)
+    "User": {
+        "on_update": "moi_app.custom_hooks.user_hooks.cleanup_employee_permissions_on_user_update"
+    },
     "Asset": {
         "before_save": "moi_app.utils.generate_item_qr"
     },
@@ -288,7 +289,7 @@ doc_events = {
 #         )
 #     ]
 
-# # 🔑 MAIN FIXTURES — MOI APP ONLY
+# 🔑 MAIN FIXTURES — MOI APP ONLY
 fixtures = [
     
     # ✅ DocTypes in MOI module
@@ -369,6 +370,9 @@ fixtures = [
     # Custom Roles (if role name contains MOI)
     {
         "dt": "Role",
+    },
+    {
+        "dt": "Workflow State",
     },
 
     {

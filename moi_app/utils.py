@@ -181,8 +181,11 @@ def embed_images_in_html(html_content):
     updated_html = re.sub(img_pattern, replace_img_tag, html_content, flags=re.IGNORECASE)
     return updated_html
 
+@frappe.whitelist()
 def attach_pdf(doc, method):
     try:
+        if type(doc) == dict:
+            doc = frappe.get_doc(doc['doctype'], doc['name'])
         # ✅ Force weasyprint
         frappe.local.conf.pdf_generation_tool = "weasyprint"
 
@@ -581,3 +584,5 @@ def get_department_head_approver(employee):
         "error": "No approver with 'Head of Department' role found in reporting chain (max depth: {0})".format(max_depth),
         "chain_depth": depth + 1
     }
+    
+    
