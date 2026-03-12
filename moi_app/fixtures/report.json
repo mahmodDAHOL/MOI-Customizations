@@ -494,6 +494,129 @@
   "disabled": 0,
   "docstatus": 0,
   "doctype": "Report",
+  "filters": [
+   {
+    "default": null,
+    "fieldname": "from_date",
+    "fieldtype": "Date",
+    "label": "From Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Monthly Attendance Timesheet",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   },
+   {
+    "default": null,
+    "fieldname": "to_date",
+    "fieldtype": "Date",
+    "label": "To Date",
+    "mandatory": 1,
+    "options": null,
+    "parent": "Monthly Attendance Timesheet",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   },
+   {
+    "default": null,
+    "fieldname": "department",
+    "fieldtype": "Link",
+    "label": "Department",
+    "mandatory": 0,
+    "options": "Department",
+    "parent": "Monthly Attendance Timesheet",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   },
+   {
+    "default": null,
+    "fieldname": "employee",
+    "fieldtype": "Link",
+    "label": "Employee",
+    "mandatory": 0,
+    "options": "Employee",
+    "parent": "Monthly Attendance Timesheet",
+    "parentfield": "filters",
+    "parenttype": "Report",
+    "wildcard_filter": 0
+   }
+  ],
+  "is_standard": "No",
+  "javascript": "frappe.query_reports[\"Monthly Attendance Timesheet\"] = {\r\n\tonload: function(report) {\r\n\t\tconst style_id = \"attendance-compact-inline-style\";\r\n\r\n\t\tif (!document.getElementById(style_id)) {\r\n\t\t\tconst style = document.createElement(\"style\");\r\n\t\t\tstyle.id = style_id;\r\n\t\t\tstyle.innerHTML = `\r\n\t\t\t\t.compact-day {\r\n\t\t\t\t\tdisplay: inline-flex;\r\n\t\t\t\t\talign-items: center;\r\n\t\t\t\t\tjustify-content: center;\r\n\t\t\t\t\tgap: 6px;\r\n\t\t\t\t\tfont-size: 12px;\r\n\t\t\t\t\twhite-space: nowrap;\r\n\t\t\t\t\tline-height: 1.1;\r\n\t\t\t\t\twidth: 100%;\r\n\t\t\t\t}\r\n\r\n\t\t\t\t.compact-hours,\r\n\t\t\t\t.badge-leave,\r\n\t\t\t\t.badge-absent,\r\n\t\t\t\t.badge-weekend {\r\n\t\t\t\t\tdisplay: inline-flex;\r\n\t\t\t\t\talign-items: center;\r\n\t\t\t\t\tjustify-content: center;\r\n\t\t\t\t\twidth: 58px;\r\n\t\t\t\t\tmin-width: 58px;\r\n\t\t\t\t\theight: 24px;\r\n\t\t\t\t\tpadding: 0 6px;\r\n\t\t\t\t\tborder-radius: 6px;\r\n\t\t\t\t\tfont-weight: 700;\r\n\t\t\t\t\tfont-size: 12px;\r\n\t\t\t\t\tbox-sizing: border-box;\r\n\t\t\t\t\ttext-align: center;\r\n\t\t\t\t}\r\n\r\n\t\t\t\t.compact-hours {\r\n\t\t\t\t\tbackground: #e8f1ff;\r\n\t\t\t\t\tborder: 1px solid #c5d6f7;\r\n\t\t\t\t\tcolor: #184a8c;\r\n\t\t\t\t}\r\n\r\n\t\t\t\t.compact-time {\r\n\t\t\t\t\tfont-size: 11px;\r\n\t\t\t\t\tcolor: #444;\r\n\t\t\t\t\tdirection: ltr;\r\n\t\t\t\t\tunicode-bidi: plaintext;\r\n\t\t\t\t}\r\n\r\n\t\t\t\t.badge-leave {\r\n\t\t\t\t\tbackground: #fff1a8;\r\n\t\t\t\t\tborder: 1px solid #f0d97a;\r\n\t\t\t\t\tcolor: #6a5500;\r\n\t\t\t\t}\r\n\r\n\t\t\t\t.badge-absent {\r\n\t\t\t\t\tbackground: #ffd6d6;\r\n\t\t\t\t\tborder: 1px solid #f1a9a9;\r\n\t\t\t\t\tcolor: #8b0000;\r\n\t\t\t\t}\r\n\r\n\t\t\t\t.badge-weekend {\r\n\t\t\t\t\tbackground: #e7e7e7;\r\n\t\t\t\t\tborder: 1px solid #cfcfcf;\r\n\t\t\t\t\tcolor: #555;\r\n\t\t\t\t}\r\n\t\t\t`;\r\n\t\t\tdocument.head.appendChild(style);\r\n\t\t}\r\n\t},\r\n\r\n\tformatter: function(value, row, column, data, default_formatter) {\r\n\t\tif (!column || !column.fieldname) {\r\n\t\t\treturn default_formatter(value, row, column, data);\r\n\t\t}\r\n\r\n\t\tif ([\"employee\", \"employee_name\", \"department\"].includes(column.fieldname)) {\r\n\t\t\treturn `<div style=\"font-weight:600;\">${value || \"\"}</div>`;\r\n\t\t}\r\n\r\n\t\tif (column.fieldname.startsWith(\"d_\")) {\r\n\t\t\tconst raw = value || \"ABSENT|||\";\r\n\t\t\tconst parts = String(raw).split(\"|\");\r\n\r\n\t\t\tconst status = parts[0] || \"ABSENT\";\r\n\t\t\tconst hours = parts[1] || \"\";\r\n\t\t\tconst inTime = parts[2] || \"\";\r\n\t\t\tconst outTime = parts[3] || \"\";\r\n\r\n\t\t\tif (status === \"LEAVE\") {\r\n\t\t\t\treturn `<span class=\"badge-leave\">إجازة</span>`;\r\n\t\t\t}\r\n\r\n\t\t\tif (status === \"WEEKEND\") {\r\n\t\t\t\treturn `<span class=\"badge-weekend\">عطلة</span>`;\r\n\t\t\t}\r\n\r\n\t\t\tif (status === \"ABSENT\") {\r\n\t\t\t\treturn `<span class=\"badge-absent\">غياب</span>`;\r\n\t\t\t}\r\n\r\n\t\t\treturn `\r\n\t\t\t\t<div class=\"compact-day\">\r\n\t\t\t\t\t<span class=\"compact-hours\">${hours}</span>\r\n\t\t\t\t\t<span class=\"compact-time\">${inTime || \"--\"}→${outTime || \"--\"}</span>\r\n\t\t\t\t</div>\r\n\t\t\t`;\r\n\t\t}\r\n\r\n\t\treturn default_formatter(value, row, column, data);\r\n\t}\r\n};",
+  "json": null,
+  "letter_head": null,
+  "modified": "2026-03-12 11:53:10.623201",
+  "module": "MOI",
+  "name": "Monthly Attendance Timesheet",
+  "prepared_report": 0,
+  "query": null,
+  "ref_doctype": "Attendance",
+  "reference_report": null,
+  "report_name": "Monthly Attendance Timesheet",
+  "report_script": "filters = filters or {}\r\n\r\nfrom_date = filters.get(\"from_date\") or frappe.utils.get_first_day(frappe.utils.today())\r\nto_date = filters.get(\"to_date\") or frappe.utils.get_last_day(frappe.utils.today())\r\nemployee = filters.get(\"employee\")\r\ndepartment = filters.get(\"department\")\r\n\r\nif from_date > to_date:\r\n    frappe.throw(\"قيمة from_date يجب أن تكون أصغر أو تساوي to_date\")\r\n\r\n\r\ndef time_to_minutes(value):\r\n    if not value:\r\n        return 0\r\n\r\n    txt = str(value)\r\n\r\n    if \" \" in txt:\r\n        txt = txt.split(\" \")[-1]\r\n\r\n    parts = txt.split(\":\")\r\n\r\n    hh = 0\r\n    mm = 0\r\n    ss = 0\r\n\r\n    if len(parts) > 0 and parts[0]:\r\n        hh = int(parts[0])\r\n\r\n    if len(parts) > 1 and parts[1]:\r\n        mm = int(parts[1])\r\n\r\n    if len(parts) > 2 and parts[2]:\r\n        ss = int(parts[2])\r\n\r\n    total = (hh * 60) + mm\r\n\r\n    if ss >= 30:\r\n        total = total + 1\r\n\r\n    return total\r\n\r\n\r\ndef minutes_to_hours(minutes_value):\r\n    return round(float(minutes_value or 0) / 60.0, 2)\r\n\r\n\r\ndate_list = []\r\ncurrent_date = frappe.utils.getdate(from_date)\r\nend_date = frappe.utils.getdate(to_date)\r\n\r\nwhile current_date <= end_date:\r\n    date_list.append(str(current_date))\r\n    current_date = frappe.utils.add_days(current_date, 1)\r\n\r\ncolumns = [\r\n    {\r\n        \"label\": \"الرقم الوظيفي\",\r\n        \"fieldname\": \"employee\",\r\n        \"fieldtype\": \"Data\",\r\n        \"width\": 140\r\n    },\r\n    {\r\n        \"label\": \"اسم الموظف\",\r\n        \"fieldname\": \"employee_name\",\r\n        \"fieldtype\": \"Data\",\r\n        \"width\": 220\r\n    },\r\n    {\r\n        \"label\": \"المديرية\",\r\n        \"fieldname\": \"department\",\r\n        \"fieldtype\": \"Data\",\r\n        \"width\": 220\r\n    }\r\n]\r\n\r\nmonth_map = {\r\n    \"01\": \"Jan\",\r\n    \"02\": \"Feb\",\r\n    \"03\": \"Mar\",\r\n    \"04\": \"Apr\",\r\n    \"05\": \"May\",\r\n    \"06\": \"Jun\",\r\n    \"07\": \"Jul\",\r\n    \"08\": \"Aug\",\r\n    \"09\": \"Sep\",\r\n    \"10\": \"Oct\",\r\n    \"11\": \"Nov\",\r\n    \"12\": \"Dec\"\r\n}\r\n\r\ndate_field_map = {}\r\n\r\nfor dt in date_list:\r\n    safe_dt = \"d_\" + dt.replace(\"-\", \"_\")\r\n    date_field_map[dt] = safe_dt\r\n\r\n    day_part = dt[8:10]\r\n    month_part = dt[5:7]\r\n    year_part = dt[0:4]\r\n\r\n    label_date = day_part + \" \" + month_map.get(month_part, month_part) + \" \" + year_part\r\n\r\n    columns.append({\r\n        \"label\": label_date,\r\n        \"fieldname\": safe_dt,\r\n        \"fieldtype\": \"Data\",\r\n        \"width\": 140\r\n    })\r\n\r\nattendance_filters = {\r\n    \"attendance_date\": [\"between\", [from_date, to_date]]\r\n}\r\n\r\nif employee:\r\n    attendance_filters[\"employee\"] = employee\r\n\r\nif department:\r\n    attendance_filters[\"department\"] = department\r\n\r\nrecords = frappe.get_all(\r\n    \"Attendance\",\r\n    filters=attendance_filters,\r\n    fields=[\r\n        \"employee\",\r\n        \"employee_name\",\r\n        \"department\",\r\n        \"attendance_date\",\r\n        \"status\",\r\n        \"working_hours\",\r\n        \"in_time\",\r\n        \"out_time\",\r\n        \"shift\"\r\n    ],\r\n    order_by=\"employee asc, attendance_date asc\"\r\n)\r\n\r\nemployee_list = []\r\nemployee_seen = {}\r\nemployee_default_shift = {}\r\n\r\nshift_names = []\r\nshift_seen = {}\r\n\r\nfor row in records:\r\n    if row.employee and row.employee not in employee_seen:\r\n        employee_list.append(row.employee)\r\n        employee_seen[row.employee] = 1\r\n\r\n    if row.employee and row.shift and row.employee not in employee_default_shift:\r\n        employee_default_shift[row.employee] = row.shift\r\n\r\n    if row.shift and row.shift not in shift_seen:\r\n        shift_names.append(row.shift)\r\n        shift_seen[row.shift] = 1\r\n\r\nassignment_filters = {\r\n    \"start_date\": [\"<=\", to_date]\r\n}\r\n\r\nif employee_list:\r\n    assignment_filters[\"employee\"] = [\"in\", employee_list]\r\n\r\nif employee:\r\n    assignment_filters[\"employee\"] = employee\r\n\r\nshift_assignments = frappe.get_all(\r\n    \"Shift Assignment\",\r\n    filters=assignment_filters,\r\n    fields=[\r\n        \"employee\",\r\n        \"shift_type\",\r\n        \"start_date\",\r\n        \"end_date\"\r\n    ],\r\n    order_by=\"employee asc, start_date asc\"\r\n)\r\n\r\nemployee_date_shift_map = {}\r\n\r\nfor sa in shift_assignments:\r\n    if not sa.employee or not sa.shift_type or not sa.start_date:\r\n        continue\r\n\r\n    assignment_start = frappe.utils.getdate(sa.start_date)\r\n    assignment_end = frappe.utils.getdate(sa.end_date) if sa.end_date else frappe.utils.getdate(to_date)\r\n    report_start = frappe.utils.getdate(from_date)\r\n    report_end = frappe.utils.getdate(to_date)\r\n\r\n    if assignment_start < report_start:\r\n        assignment_start = report_start\r\n\r\n    if assignment_end > report_end:\r\n        assignment_end = report_end\r\n\r\n    if assignment_start > assignment_end:\r\n        continue\r\n\r\n    if sa.shift_type not in shift_seen:\r\n        shift_names.append(sa.shift_type)\r\n        shift_seen[sa.shift_type] = 1\r\n\r\n    d = assignment_start\r\n    while d <= assignment_end:\r\n        employee_date_shift_map[sa.employee + \"||\" + str(d)] = sa.shift_type\r\n        d = frappe.utils.add_days(d, 1)\r\n\r\nshift_map = {}\r\nholiday_list_names = []\r\nholiday_list_seen = {}\r\n\r\nif shift_names:\r\n    shift_rows = frappe.get_all(\r\n        \"Shift Type\",\r\n        filters={\"name\": [\"in\", shift_names]},\r\n        fields=[\r\n            \"name\",\r\n            \"start_time\",\r\n            \"end_time\",\r\n            \"early_exit_grace_period\",\r\n            \"holiday_list\"\r\n        ]\r\n    )\r\n\r\n    for shift_row in shift_rows:\r\n        shift_map[shift_row.name] = shift_row\r\n        if shift_row.holiday_list and shift_row.holiday_list not in holiday_list_seen:\r\n            holiday_list_names.append(shift_row.holiday_list)\r\n            holiday_list_seen[shift_row.holiday_list] = 1\r\n\r\nholiday_map = {}\r\n\r\nif holiday_list_names:\r\n    holiday_rows = frappe.get_all(\r\n        \"Holiday\",\r\n        filters={\r\n            \"parent\": [\"in\", holiday_list_names],\r\n            \"holiday_date\": [\"between\", [from_date, to_date]]\r\n        },\r\n        fields=[\r\n            \"parent\",\r\n            \"holiday_date\"\r\n        ]\r\n    )\r\n\r\n    for hr in holiday_rows:\r\n        key = hr.parent + \"||\" + str(hr.holiday_date)\r\n        holiday_map[key] = 1\r\n\r\nemployees_map = {}\r\n\r\nfor row in records:\r\n    emp = row.employee\r\n\r\n    if emp not in employees_map:\r\n        base_row = {\r\n            \"employee\": row.employee or \"\",\r\n            \"employee_name\": row.employee_name or \"\",\r\n            \"department\": row.department or \"\"\r\n        }\r\n\r\n        for dt in date_list:\r\n            safe_dt = date_field_map[dt]\r\n\r\n            shift_name = employee_date_shift_map.get(emp + \"||\" + dt)\r\n\r\n            if not shift_name:\r\n                shift_name = employee_default_shift.get(emp)\r\n\r\n            is_holiday = 0\r\n\r\n            # فحص holiday_list\r\n            if shift_name and shift_name in shift_map:\r\n                holiday_list_name = shift_map[shift_name].holiday_list\r\n                if holiday_list_name and holiday_map.get(holiday_list_name + \"||\" + dt):\r\n                    is_holiday = 1\r\n\r\n            # فحص الجمعة والسبت كاحتياط\r\n            if not is_holiday:\r\n                weekday = frappe.utils.getdate(dt).weekday()\r\n                if weekday in [4, 5]:\r\n                    is_holiday = 1\r\n\r\n            if is_holiday:\r\n                base_row[safe_dt] = \"WEEKEND|||\"\r\n            else:\r\n                base_row[safe_dt] = \"ABSENT|||\"\r\n\r\n        employees_map[emp] = base_row\r\n\r\n    day_key = str(row.attendance_date)\r\n    safe_day_key = date_field_map.get(day_key)\r\n\r\n    if not safe_day_key:\r\n        continue\r\n\r\n    status_value = row.status or \"\"\r\n\r\n    if status_value == \"Absent\":\r\n        employees_map[emp][safe_day_key] = \"ABSENT|||\"\r\n\r\n    elif status_value == \"On Leave\":\r\n        employees_map[emp][safe_day_key] = \"LEAVE|||\"\r\n\r\n    elif status_value == \"Work From Home\":\r\n        shift_doc = None\r\n\r\n        if row.shift and row.shift in shift_map:\r\n            shift_doc = shift_map[row.shift]\r\n        else:\r\n            shift_name = employee_date_shift_map.get(emp + \"||\" + day_key)\r\n            if not shift_name:\r\n                shift_name = employee_default_shift.get(emp)\r\n            if shift_name and shift_name in shift_map:\r\n                shift_doc = shift_map[shift_name]\r\n\r\n        if shift_doc:\r\n            start_minutes = time_to_minutes(shift_doc.start_time)\r\n            end_minutes = time_to_minutes(shift_doc.end_time)\r\n\r\n            if end_minutes < start_minutes:\r\n                end_minutes = end_minutes + (24 * 60)\r\n\r\n            grace_minutes = int(shift_doc.early_exit_grace_period or 0)\r\n            total_minutes = (end_minutes - start_minutes) + grace_minutes\r\n            total_hours = str(minutes_to_hours(total_minutes))\r\n        else:\r\n            total_hours = \"0\"\r\n\r\n        employees_map[emp][safe_day_key] = \"WFH|\" + total_hours + \"||\"\r\n\r\n    elif status_value == \"Present\":\r\n        in_time = frappe.utils.format_time(row.in_time, \"HH:mm\") if row.in_time else \"\"\r\n        out_time = frappe.utils.format_time(row.out_time, \"HH:mm\") if row.out_time else \"\"\r\n\r\n        if in_time and out_time:\r\n            hours = str(round(float(row.working_hours or 0), 2))\r\n            employees_map[emp][safe_day_key] = \"PRESENT|\" + hours + \"|\" + in_time + \"|\" + out_time\r\n        else:\r\n            employees_map[emp][safe_day_key] = \"ABSENT|||\"\r\n\r\n    else:\r\n        in_time = frappe.utils.format_time(row.in_time, \"HH:mm\") if row.in_time else \"\"\r\n        out_time = frappe.utils.format_time(row.out_time, \"HH:mm\") if row.out_time else \"\"\r\n\r\n        if in_time and out_time:\r\n            hours = str(round(float(row.working_hours or 0), 2))\r\n            employees_map[emp][safe_day_key] = \"PRESENT|\" + hours + \"|\" + in_time + \"|\" + out_time\r\n        else:\r\n            employees_map[emp][safe_day_key] = \"ABSENT|||\"\r\n\r\nresult = []\r\nfor emp in employees_map:\r\n    result.append(employees_map[emp])\r\n\r\ndata = columns, result",
+  "report_type": "Script Report",
+  "roles": [
+   {
+    "parent": "Monthly Attendance Timesheet",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee"
+   },
+   {
+    "parent": "Monthly Attendance Timesheet",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee"
+   },
+   {
+    "parent": "Monthly Attendance Timesheet",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "HR Manager"
+   },
+   {
+    "parent": "Monthly Attendance Timesheet",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "HR User"
+   },
+   {
+    "parent": "Monthly Attendance Timesheet",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "System Manager"
+   },
+   {
+    "parent": "Monthly Attendance Timesheet",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Employee Self Service"
+   },
+   {
+    "parent": "Monthly Attendance Timesheet",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "hr-workspace"
+   },
+   {
+    "parent": "Monthly Attendance Timesheet",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "hr-viewer"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
   "filters": [],
   "is_standard": "No",
   "javascript": null,

@@ -76,7 +76,7 @@ async def _html_to_pdf_bytes(html_content: str) -> bytes:
 
         # Set content
         await page.set_content(html_content)
-        await page.screenshot(path="mahmod.png")
+        # await page.screenshot(path="mahmod.png")
         # Generate PDF with high-fidelity settings
         pdf_bytes = await page.pdf(
             scale=1.0,

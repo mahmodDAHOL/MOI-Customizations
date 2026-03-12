@@ -255,19 +255,19 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-01-27 10:59:55.866528",
-  "name": "Sent To HR",
-  "style": "",
-  "workflow_state_name": "Sent To HR"
+  "modified": "2025-07-21 14:11:31.866682",
+  "name": "Pending Review",
+  "style": "Inverse",
+  "workflow_state_name": "Pending Review"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2025-07-21 14:11:31.866682",
-  "name": "Pending Review",
-  "style": "Inverse",
-  "workflow_state_name": "Pending Review"
+  "modified": "2026-01-27 10:59:55.866528",
+  "name": "Sent To HR",
+  "style": "",
+  "workflow_state_name": "Sent To HR"
  },
  {
   "docstatus": 0,
@@ -309,19 +309,19 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2025-07-21 14:08:46.239889",
-  "name": "Done",
-  "style": "Success",
-  "workflow_state_name": "Done"
+  "modified": "2026-03-01 09:41:24.154610",
+  "name": "Sent To Manager",
+  "style": "",
+  "workflow_state_name": "Sent To Manager"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2026-03-01 09:41:24.154610",
-  "name": "Sent To Manager",
-  "style": "",
-  "workflow_state_name": "Sent To Manager"
+  "modified": "2025-07-21 14:08:46.239889",
+  "name": "Done",
+  "style": "Success",
+  "workflow_state_name": "Done"
  },
  {
   "docstatus": 0,
@@ -381,19 +381,19 @@
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2025-07-21 11:23:45.893297",
-  "name": "Completed",
+  "modified": "2025-08-13 11:10:12.656958",
+  "name": "Draft",
   "style": "",
-  "workflow_state_name": "Completed"
+  "workflow_state_name": "Draft"
  },
  {
   "docstatus": 0,
   "doctype": "Workflow State",
   "icon": "",
-  "modified": "2025-08-13 11:10:12.656958",
-  "name": "Draft",
+  "modified": "2025-07-21 11:23:45.893297",
+  "name": "Completed",
   "style": "",
-  "workflow_state_name": "Draft"
+  "workflow_state_name": "Completed"
  },
  {
   "docstatus": 0,
