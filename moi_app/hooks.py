@@ -122,9 +122,11 @@ jinja = {
 
 permission_query_conditions = {
     "Asset": "moi_app.permissions.get_permission_query_conditions_for_asset",
-    "Employee": "moi_app.permissions.material_request_query_condition",
-    "Employee": "moi_app.permissions.employee_query_condition",
-    # "Employee": "moi_app.permissions.get_permission_query_conditions_for_employee"
+    "Asset": "moi_app.permissions.asset_query_condition",
+    "Material Request": "moi_app.permissions.material_request_query_condition",
+    # "Employee": "moi_app.permissions.employee_query_condition",
+    "Employee": "moi_app.permissions.get_permission_query_conditions_for_employee",
+    # "Employee": "moi_app.permissions.employee_query_condition"
 }
 #
 # has_permission = {
@@ -150,12 +152,12 @@ doc_events = {
     "Asset": {
         "before_save": "moi_app.utils.generate_item_qr"
     },
-    "Leave Application": {
-        "on_update": "moi_app.utils.attach_pdf"
-    },
-    "Purchase Order": {
-        "on_update": "moi_app.utils.attach_pdf"
-    },
+    # "Leave Application": {
+    #     "on_update": "moi_app.utils.attach_pdf"
+    # },
+    # "Purchase Order": {
+    #     "on_update": "moi_app.utils.attach_pdf"
+    # },
     
 
 }
@@ -163,23 +165,29 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
+scheduler_events = {
+    
+    "cron": {
+        "0 4 * * *": [
+            "fingerprint.api.fetch_checkins.scheduled_fetch_checkins"
+        ]
+    }
 # 	"all": [
 # 		"moi_app.tasks.all"
 # 	],
 # 	"daily": [
 # 		"moi_app.tasks.daily"
 # 	],
-# 	"hourly": [
-# 		"moi_app.tasks.hourly"
-# 	],
+	# "hourly": [
+	# 	"fingerprint.api.fetch_checkins.scheduled_fetch_checkins"
+	# ],
 # 	"weekly": [
 # 		"moi_app.tasks.weekly"
 # 	],
 # 	"monthly": [
 # 		"moi_app.tasks.monthly"
 # 	],
-# }
+}
 
 # Testing
 # -------

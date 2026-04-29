@@ -15,6 +15,7 @@ frappe.ui.form.on("Leave Application", {
 				},
 				callback: function (r) {
 					if (r && r.message) {
+						console.log("dfdfdee"+r.message);
 						frm.set_value("total_leave_days", r.message);
 						frm.trigger("get_leave_balance");
 					}

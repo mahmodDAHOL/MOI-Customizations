@@ -26,7 +26,7 @@ class LeaveApplicationThai(LeaveApplication):
 	def validate_balance_leaves(self):
 		# Patch
 		self.validate_half_day_hours()
-		half_day_hours = self.custom_hours and int(self.custom_hours) or None
+		half_day_hours = self.custom_hours and float(self.custom_hours) or None
 		# --
 		if self.from_date and self.to_date:
 			self.total_leave_days = get_number_of_leave_days(
@@ -74,29 +74,44 @@ def get_number_of_leave_days(
 	half_day: int | str | None = None,
 	half_day_date: datetime.date | str | None = None,
 	holiday_list: str | None = None,
-	half_day_hours: int | None = None,  # Monkey Patch
+	half_day_hours: float | str | None = None,  # Allow string input
 ) -> float:
-	"""Returns number of leave days between 2 dates after considering half day and holidays
-	(Based on the include_holiday setting in Leave Type)"""
+	"""Returns number of leave days between 2 dates after considering half day and holidays"""
+	
+	# --- Convert half_day_hours to float safely ---
+	half_day_hours_value = 0.0
+	if half_day_hours is not None:
+		try:
+			half_day_hours_value = float(half_day_hours)
+		except (ValueError, TypeError):
+			half_day_hours_value = 4.0  # Default to 4 hours if conversion fails
+	else:
+		half_day_hours_value = 4.0  # Default half day = 4 hours
+	
+	# --- Calculate number of days ---
 	number_of_days = 0
+	
 	if cint(half_day) == 1:
 		if getdate(from_date) == getdate(to_date):
-			# --- Monkey patch - use hours for half day
-			number_of_days = (int(half_day_hours or 0) or 4) / 8
+			# Same day half leave
+			number_of_days = half_day_hours_value / 8.0
+			
 		elif half_day_date and getdate(from_date) <= getdate(half_day_date) <= getdate(to_date):
-			# Monkey patch - use hours for half day
-			number_of_days = date_diff(to_date, from_date) + (int(half_day_hours or 0) or 4) / 8
+			# Half day within the leave period
+			number_of_days = date_diff(to_date, from_date) + (half_day_hours_value / 8.0)
 		else:
+			# Half day not properly specified - treat as full day
 			number_of_days = date_diff(to_date, from_date) + 1
 	else:
+		# Full day leave
 		number_of_days = date_diff(to_date, from_date) + 1
-
+	
+	# --- Subtract holidays if needed ---
 	if not frappe.db.get_value("Leave Type", leave_type, "include_holiday"):
-		number_of_days = flt(number_of_days) - flt(
-			get_holidays(employee, from_date, to_date, holiday_list=holiday_list)
-		)
-	return number_of_days
-
+		holiday_days = get_holidays(employee, from_date, to_date, holiday_list=holiday_list)
+		number_of_days = flt(number_of_days) - flt(holiday_days)
+	
+	return flt(number_of_days)
 
 def get_leaves_for_period(
 	employee: str,

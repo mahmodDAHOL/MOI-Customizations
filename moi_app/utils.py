@@ -7,12 +7,14 @@ import os
 from frappe.utils.file_manager import save_file
 from urllib.parse import urlparse
 
+from bs4 import BeautifulSoup
+
 def generate_item_qr(doc, method):
-    if not doc.item_code:
+    if not doc.custom_origin_number:
         return
 
     # Generate QR code content
-    qr_content = doc.item_code
+    qr_content = doc.custom_origin_number
     qr = pyqrcode.create(qr_content, encoding='utf-8')
 
     # Use BytesIO to hold binary PNG data
@@ -22,10 +24,9 @@ def generate_item_qr(doc, method):
 
     # Get raw binary (bytes), NOT base64
     file_content = buffer.getvalue()  # ← This is correct: raw PNG bytes
-
     # Save file using Frappe's save_file
     file_doc = save_file(
-        fname=f"{doc.item_code}_qr.png",
+        fname=f"{doc.custom_origin_number}_qr.png".replace('/', '-'),
         content=file_content,       # ✅ Raw bytes, not base64
         dt="Asset",                 # DocType
         dn=doc.name,                # Document name
@@ -440,25 +441,88 @@ def number_to_arabic_words(amount, currency="USD"):
 
 
 def get_employee_assets(employee):
+    from bs4 import BeautifulSoup
     # Get summarized assets: each item with total quantity
-    assets_summary = frappe.db.sql("""
+    assets_summary = frappe.db.sql(r"""
         SELECT 
             item_code,
             item_name,
+            custom_origin_number,
+            custom_description,
             asset_category AS item_type,
             SUM(asset_quantity) AS total_quantity,
-            COUNT(*) AS asset_count  -- Number of individual asset records
+            COUNT(*) AS asset_count,
+            GROUP_CONCAT(DISTINCT custom_description SEPARATOR '\n') AS assets_description,
+            GROUP_CONCAT(DISTINCT custom_origin_number SEPARATOR '\n') AS assets_origin_number
         FROM 
             `tabAsset`
         WHERE 
             custodian = %(employee)s
-            AND docstatus = 1
         GROUP BY 
             item_code, item_name, asset_category
         ORDER BY 
             total_quantity DESC, item_name
-    """, {"employee": "10034"}, as_dict=True)
+    """, {"employee": employee}, as_dict=True)
+
+    for row in assets_summary:
+        if row.get('assets_origin_number'):
+            row['assets_origin_number'] = row['assets_origin_number'].replace('\n', '<br>')
+
+        desc = row.get('assets_description', '')
+
+        soup = BeautifulSoup(desc, 'html.parser')
+        if any(k in row.get('item_name', '') for k in ['لابتوب', 'شاشة', 'حاسب', 'حاسوب','موبايل']):
+            for td in soup.find_all('td'):
+                if td.get_text(strip=True) == 'الشركة المصنعة':
+                    # Get the previous sibling td (the one before this td)
+                    prev_td = td.find_previous_sibling('td')
+                    if prev_td:
+                        manufacturer = prev_td.get_text(strip=True)
+                        row['manufacturer'] = manufacturer
+                        row['item_name_with_manufacturer'] = f"{row['item_name']} \n {manufacturer}" if manufacturer else row['item_name']
+        else:
+            row['item_name_with_manufacturer'] = row['item_name']
+
+        keep_keys = ['نوع المعالج', 'حجم الرامات', 'مواصفات الهارد', 'ملحقات', 'القياس']
+        # Find all rows and collect those to KEEP (NOT remove)
+        rows_to_keep = []
+        tables = soup.find_all('table')
+        processed_tables = []
+
+        for table in tables:
+            rows_to_keep = []
+            rows = table.find_all('tr')
+            
+            for table_row in rows:
+                cells = table_row.find_all('td')
+                if len(cells) >= 2:
+                    key_cell = cells[1] if len(cells) > 1 else None
+                    if key_cell:
+                        key_text = key_cell.get_text(strip=True)
+                        if key_text in keep_keys:
+                            rows_to_keep.append(table_row)
+                else:
+                    rows_to_keep.append(table_row)
+            
+            # Create a new table with kept rows
+            if rows_to_keep:
+                # Create new table with same attributes
+                new_table = BeautifulSoup('<table></table>', 'html.parser').table
+                if table.attrs:
+                    for attr, value in table.attrs.items():
+                        new_table[attr] = value
+                
+                # Add kept rows
+                for table_row in rows_to_keep:
+                    new_table.append(table_row)
+                
+                processed_tables.append(str(new_table))
+
+        row['assets_description'] = '<br>'.join(processed_tables)
+
+    assets_summary = sorted(assets_summary, key=lambda x: x.get('assets_description', ''),reverse=True)
     return assets_summary
+
 
 @frappe.whitelist()
 def fetch_employee_assets(employee):

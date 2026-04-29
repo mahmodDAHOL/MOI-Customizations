@@ -6,6 +6,26 @@ def cleanup_employee_permissions_on_user_update(doc, method=None):
     ON UPDATE: Remove existing Employee User Permissions for this user.
     Use ONLY during migration period – not needed long-term with prevention in place.
     """
+
+    # Check if user has any of the specified roles
+    target_roles = ["HR User", "HR Manager", "Asset manager", "Head of Department", "Employee"]
+
+    # Get user's roles
+    if hasattr(doc, 'roles') and doc.roles:
+        user_roles = [role.role for role in doc.roles if hasattr(role, 'role')]
+    else:
+        # Fetch roles from database if not in document
+        user_roles = frappe.get_roles(doc.name)
+
+    # Check if user has ANY of the target roles
+    has_target_role = False
+    for role in user_roles:
+        if role in target_roles:
+            has_target_role = True
+            break
+
+    if not has_target_role:
+        return
     # Skip new users (no permissions exist yet)
     if doc.get("__islocal"):
         return
@@ -19,7 +39,7 @@ def cleanup_employee_permissions_on_user_update(doc, method=None):
         "User Permission",
         filters={
             "user": doc.name,
-            "allow": "Employee"
+            # "allow": "Employee"
         },
         pluck="name"
     )
