@@ -1125,9 +1125,9 @@
   "home_page": null,
   "is_custom": 0,
   "modified": "2026-02-04 12:11:06.303528",
-  "name": "Shared-services",
+  "name": "Shared-Services-Other",
   "restrict_to_domain": null,
-  "role_name": "Shared-services",
+  "role_name": "Shared-Services-Other",
   "two_factor_auth": 0
  },
  {
@@ -1440,6 +1440,84 @@
   "name": "Task Manager",
   "restrict_to_domain": null,
   "role_name": "Task Manager",
+  "two_factor_auth": 0
+ },
+ {
+  "desk_access": 1,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Role",
+  "home_page": null,
+  "is_custom": 0,
+  "modified": "2026-05-05 12:19:38.270263",
+  "name": "Shared-Services-Stock",
+  "restrict_to_domain": null,
+  "role_name": "Shared-Services-Stock",
+  "two_factor_auth": 0
+ },
+ {
+  "desk_access": 1,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Role",
+  "home_page": null,
+  "is_custom": 0,
+  "modified": "2026-05-06 12:35:43.954911",
+  "name": "Download application",
+  "restrict_to_domain": null,
+  "role_name": "Download application",
+  "two_factor_auth": 0
+ },
+ {
+  "desk_access": 1,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Role",
+  "home_page": null,
+  "is_custom": 0,
+  "modified": "2026-05-06 12:36:52.428634",
+  "name": "Website Statistics",
+  "restrict_to_domain": null,
+  "role_name": "Website Statistics",
+  "two_factor_auth": 0
+ },
+ {
+  "desk_access": 1,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Role",
+  "home_page": null,
+  "is_custom": 0,
+  "modified": "2026-05-13 10:00:08.777557",
+  "name": "Leave Application Editor",
+  "restrict_to_domain": null,
+  "role_name": "Leave Application Editor",
+  "two_factor_auth": 0
+ },
+ {
+  "desk_access": 1,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Role",
+  "home_page": null,
+  "is_custom": 0,
+  "modified": "2026-05-14 10:07:16.229060",
+  "name": "manager-viewer",
+  "restrict_to_domain": null,
+  "role_name": "manager-viewer",
+  "two_factor_auth": 0
+ },
+ {
+  "desk_access": 1,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Role",
+  "home_page": null,
+  "is_custom": 0,
+  "modified": "2026-05-24 13:53:59.574715",
+  "name": "MOMC web admin",
+  "restrict_to_domain": null,
+  "role_name": "MOMC web admin",
   "two_factor_auth": 0
  }
 ]

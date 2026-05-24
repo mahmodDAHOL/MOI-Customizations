@@ -212,7 +212,7 @@
     "parent": "Task KPI Report",
     "parentfield": "roles",
     "parenttype": "Report",
-    "role": "Shared-services"
+    "role": "Shared-Services-Other"
    },
    {
     "parent": "Task KPI Report",
@@ -364,7 +364,7 @@
     "parent": "Leaf Tasks",
     "parentfield": "roles",
     "parenttype": "Report",
-    "role": "Shared-services"
+    "role": "Shared-Services-Other"
    },
    {
     "parent": "Leaf Tasks",
@@ -494,6 +494,62 @@
   "disabled": 0,
   "docstatus": 0,
   "doctype": "Report",
+  "filters": [],
+  "is_standard": "No",
+  "javascript": null,
+  "json": null,
+  "letter_head": null,
+  "modified": "2026-01-13 14:34:10.199454",
+  "module": "MOI",
+  "name": "Candidate Ranking",
+  "prepared_report": 1,
+  "query": "{\r\n  \"filters\": [\r\n    [\"Interview\", \"arange_rating\", \">\", 3.5]\r\n  ],\r\n  \"fields\": [\r\n    [\"interview_round\", \"Interview\"],\r\n    [\"job_applicant\", \"Interview\"],\r\n    [\"job_opening\", \"Interview\"],\r\n    [\"designation\", \"Interview\"],\r\n    [\"status\", \"Interview\"],\r\n    [\"from_time\", \"Interview\"],\r\n    [\"to_time\", \"Interview\"],\r\n    [\"rating\", \"Interview\"]\r\n  ],\r\n  \"order_by\": \"`tabInterview`.`modified` desc\",\r\n  \"add_totals_row\": false,\r\n  \"page_length\": 2500,\r\n  \"column_widths\": {\r\n    \"interview_round\": 150,\r\n    \"job_applicant\": 180,\r\n    \"job_opening\": 180,\r\n    \"designation\": 150,\r\n    \"status\": 120,\r\n    \"from_time\": 140,\r\n    \"to_time\": 140,\r\n    \"rating\": 100\r\n  },\r\n  \"group_by\": null\r\n}",
+  "ref_doctype": "Interview",
+  "reference_report": null,
+  "report_name": "Candidate Ranking",
+  "report_script": null,
+  "report_type": "Query Report",
+  "roles": [
+   {
+    "parent": "Candidate Ranking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Interviewer"
+   },
+   {
+    "parent": "Candidate Ranking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "System Manager"
+   },
+   {
+    "parent": "Candidate Ranking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "HR User"
+   },
+   {
+    "parent": "Candidate Ranking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "HR Manager"
+   },
+   {
+    "parent": "Candidate Ranking",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "hr-viewer"
+   }
+  ],
+  "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
   "filters": [
    {
     "default": null,
@@ -603,62 +659,6 @@
    },
    {
     "parent": "Monthly Attendance Timesheet",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "hr-viewer"
-   }
-  ],
-  "timeout": 0
- },
- {
-  "add_total_row": 0,
-  "add_translate_data": 0,
-  "columns": [],
-  "disabled": 0,
-  "docstatus": 0,
-  "doctype": "Report",
-  "filters": [],
-  "is_standard": "No",
-  "javascript": null,
-  "json": null,
-  "letter_head": null,
-  "modified": "2026-01-13 14:34:10.199454",
-  "module": "MOI",
-  "name": "Candidate Ranking",
-  "prepared_report": 1,
-  "query": "{\r\n  \"filters\": [\r\n    [\"Interview\", \"arange_rating\", \">\", 3.5]\r\n  ],\r\n  \"fields\": [\r\n    [\"interview_round\", \"Interview\"],\r\n    [\"job_applicant\", \"Interview\"],\r\n    [\"job_opening\", \"Interview\"],\r\n    [\"designation\", \"Interview\"],\r\n    [\"status\", \"Interview\"],\r\n    [\"from_time\", \"Interview\"],\r\n    [\"to_time\", \"Interview\"],\r\n    [\"rating\", \"Interview\"]\r\n  ],\r\n  \"order_by\": \"`tabInterview`.`modified` desc\",\r\n  \"add_totals_row\": false,\r\n  \"page_length\": 2500,\r\n  \"column_widths\": {\r\n    \"interview_round\": 150,\r\n    \"job_applicant\": 180,\r\n    \"job_opening\": 180,\r\n    \"designation\": 150,\r\n    \"status\": 120,\r\n    \"from_time\": 140,\r\n    \"to_time\": 140,\r\n    \"rating\": 100\r\n  },\r\n  \"group_by\": null\r\n}",
-  "ref_doctype": "Interview",
-  "reference_report": null,
-  "report_name": "Candidate Ranking",
-  "report_script": null,
-  "report_type": "Query Report",
-  "roles": [
-   {
-    "parent": "Candidate Ranking",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "Interviewer"
-   },
-   {
-    "parent": "Candidate Ranking",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "System Manager"
-   },
-   {
-    "parent": "Candidate Ranking",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "HR User"
-   },
-   {
-    "parent": "Candidate Ranking",
-    "parentfield": "roles",
-    "parenttype": "Report",
-    "role": "HR Manager"
-   },
-   {
-    "parent": "Candidate Ranking",
     "parentfield": "roles",
     "parenttype": "Report",
     "role": "hr-viewer"

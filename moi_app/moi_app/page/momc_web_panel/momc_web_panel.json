@@ -1,0 +1,17 @@
+{
+    "creation": "2025-05-24 00:00:00.000000",
+    "doctype": "Page",
+    "modified": "2025-05-24 00:00:00.000000",
+    "modified_by": "Administrator",
+    "module": "MOI",
+    "name": "momc-web-panel",
+    "owner": "Administrator",
+    "page_name": "momc-web-panel",
+    "roles": [
+        {
+            "role": "MOMC web admin"
+        }
+    ],
+    "standard": "Yes",
+    "title": "MOMC web admin"
+}

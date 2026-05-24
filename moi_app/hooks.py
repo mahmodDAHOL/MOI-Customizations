@@ -79,6 +79,7 @@ jinja = {
     "methods": [
         "moi_app.utils.number_to_arabic_words",
         "moi_app.utils.get_hijri_date",
+        "moi_app.utils.convert_table",
         # ... other methods
     ]
 }
@@ -121,12 +122,18 @@ jinja = {
 # Permissions evaluated in scripted ways
 
 permission_query_conditions = {
-    "Asset": "moi_app.permissions.get_permission_query_conditions_for_asset",
     "Asset": "moi_app.permissions.asset_query_condition",
     "Material Request": "moi_app.permissions.material_request_query_condition",
-    # "Employee": "moi_app.permissions.employee_query_condition",
     "Employee": "moi_app.permissions.get_permission_query_conditions_for_employee",
-    # "Employee": "moi_app.permissions.employee_query_condition"
+    "Vehicle": "moi_app.permissions.vehicle_query_conditions",
+    "Request for Machinery Maintenance": "moi_app.permissions.request_for_machinery_maintenance_query_conditions",
+    "Request Car Wash": "moi_app.permissions.request_car_wash_query_conditions",
+    "Request a vehicle reservation": "moi_app.permissions.request_a_vehicle_reservation_query_conditions",
+    "Technical Committee Receiving Minutes": "moi_app.permissions.technical_committee_receiving_minutes_query_conditions",
+    "Request for an Oil Change from the Central Garage": "moi_app.permissions.request_for_an_oil_change_from_the_central_garage_query_conditions",
+    "Cleaning Company Performance Evaluation": "moi_app.permissions.cleaning_company_performance_evaluation_query_conditions",
+    "Leave Application": "moi_app.permissions.leave_application_query_conditions",
+    "Attendance Request": "moi_app.permissions.attendance_request_query_conditions",
 }
 #
 # has_permission = {
@@ -152,9 +159,9 @@ doc_events = {
     "Asset": {
         "before_save": "moi_app.utils.generate_item_qr"
     },
-    # "Leave Application": {
-    #     "on_update": "moi_app.utils.attach_pdf"
-    # },
+    "Leave Application": {
+        "on_submit": "moi_app.utils.attach_pdf"
+    },
     # "Purchase Order": {
     #     "on_update": "moi_app.utils.attach_pdf"
     # },
@@ -297,96 +304,99 @@ scheduler_events = {
 #         )
 #     ]
 
-# 🔑 MAIN FIXTURES — MOI APP ONLY
-fixtures = [
+# # 🔑 MAIN FIXTURES — MOI APP ONLY
+# fixtures = [
     
-    # ✅ DocTypes in MOI module
-    {
-        "doctype": "DocType",
-        "filters": [["module", "=", "MOI"]]
-    },
+#     # ✅ DocTypes in MOI module
+#     {
+#         "doctype": "DocType",
+#         "filters": [["module", "=", "MOI"]]
+#     },
 
-    # ✅ Configurations WITH `module` field (v14+)
-    {
-        "doctype": "Property Setter",
-        "filters": [["module", "=", "MOI"]]
-    },
-    {
-        "doctype": "Client Script",  # Replaces "Client Script"
-        "filters": [["module", "=", "MOI"]]
-    },
-    {
-        "doctype": "Server Script",
-        "filters": [["module", "=", "MOI"]]
-    },
-    {
-        "doctype": "Custom Field",
-        "filters": [["module", "=", "MOI"]]
-    },
+#     # ✅ Configurations WITH `module` field (v14+)
+#     {
+#         "doctype": "Property Setter",
+#         "filters": [["module", "=", "MOI"]]
+#     },
+#     {
+#         "doctype": "Client Script",  # Replaces "Client Script"
+#         "filters": [["module", "=", "MOI"]]
+#     },
+#     {
+#         "doctype": "Server Script",
+#         "filters": [["module", "=", "MOI"]]
+#     },
+#     {
+#         "doctype": "Custom Field",
+#         "filters": [["module", "=", "MOI"]]
+#     },
 
-    # ✅ Print Formats (filter by MOI doctypes + non-standard)
-    {
-        "doctype": "Print Format",
-        "filters": [
-             ["module", "=", "MOI"],
-            # ["standard", "=", "No"]
-        ]
-    },
+#     # ✅ Print Formats (filter by MOI doctypes + non-standard)
+#     {
+#         "doctype": "Print Format",
+#         "filters": [
+#              ["module", "=", "MOI"],
+#             # ["standard", "=", "No"]
+#         ]
+#     },
 
-    # ✅ Workspaces — match by module (if set) OR content (doctype names)
-    {
-        "dt": "Workspace",
-        "filters": [
-            ["company", "=", "Ministry of Information"]
-        ]
-    },
+#     # ✅ Workspaces — match by module (if set) OR content (doctype names)
+#     {
+#         "dt": "Workspace",
+#         "filters": [
+#             ["company", "=", "Ministry of Information"]
+#         ]
+#     },
 
-    # ✅ Workflows & States (linked via document_type)
-    {
-        "doctype": "Workflow",
-    },
-
-
-    # ✅ Reports (custom & query-based)
-    {
-        "doctype": "Report",
-        "filters": [ ["module", "=", "MOI"]]
-    },
+#     # ✅ Workflows & States (linked via document_type)
+#     {
+#         "doctype": "Workflow",
+#     },
 
 
+#     # ✅ Reports (custom & query-based)
+#     {
+#         "doctype": "Report",
+#         "filters": [ ["module", "=", "MOI"]]
+#     },
 
-    # ✅ Website Pages & Themes (match by name/module)
-    {
-        "doctype": "Web Page",
-        "filters": [ ["module", "=", "MOI"]]
-    },
-    {
-        "doctype": "Page",
-        "filters": [ ["module", "=", "MOI"]]
-    },
-    {
-        "doctype": "Web Form",
-        "filters": [ ["module", "=", "MOI"]]
-    },
-    {
-        "doctype": "Website Theme",
-        "filters": [ ["module", "=", "MOI"]]
-    },
 
-    # ✅ Bonus: Add missing customizations commonly used in MOI:
+
+#     # ✅ Website Pages & Themes (match by name/module)
+#     {
+#         "doctype": "Web Page",
+#         "filters": [ ["module", "=", "MOI"]]
+#     },
+#     {
+#         "doctype": "Page",
+#         "filters": [ ["module", "=", "MOI"]]
+#     },
+#     {
+#         "doctype": "Web Form",
+#         "filters": [ ["module", "=", "MOI"]]
+#     },
+#     {
+#         "doctype": "Website Theme",
+#         "filters": [ ["module", "=", "MOI"]]
+#     },
+
+#     # ✅ Bonus: Add missing customizations commonly used in MOI:
     
-    # Custom Roles (if role name contains MOI)
-    {
-        "dt": "Role",
-    },
-    {
-        "dt": "Workflow State",
-    },
+#     # Custom Roles (if role name contains MOI)
+#     {
+#         "dt": "Role",
+#     },
+#     {
+#         "dt": "Workflow State",
+#     },
 
-    {
-        "dt": "Dashboard",
-        "filters": [ ["module", "=", "MOI"]]
-    },
+#     {
+#         "dt": "Dashboard",
+#         "filters": [ ["module", "=", "MOI"]]
+#     },
+#     {
+#         "dt": "User Permission",
+#     },
 
-]
+# ]
 

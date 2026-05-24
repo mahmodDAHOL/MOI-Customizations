@@ -447,31 +447,32 @@ def get_employee_assets(employee):
         SELECT 
             item_code,
             item_name,
-            custom_origin_number,
-            custom_description,
-            asset_category AS item_type,
-            SUM(asset_quantity) AS total_quantity,
-            COUNT(*) AS asset_count,
-            GROUP_CONCAT(DISTINCT custom_description SEPARATOR '\n') AS assets_description,
-            GROUP_CONCAT(DISTINCT custom_origin_number SEPARATOR '\n') AS assets_origin_number
+            custom_origin_number AS assets_origin_number,
+            custom_description AS assets_description,
+            custom_color AS color,
+            custom_extensions AS extensions,
+            asset_quantity,
+            custom_model AS model,
+            asset_category AS item_type
         FROM 
             `tabAsset`
         WHERE 
             custodian = %(employee)s
-        GROUP BY 
-            item_code, item_name, asset_category
-        ORDER BY 
-            total_quantity DESC, item_name
-    """, {"employee": employee}, as_dict=True)
+            AND status NOT IN ('Scrapped', 'Disposed', 'Sold')
+        ORDER BY assets_origin_number
 
+    """, {"employee": employee}, as_dict=True)
     for row in assets_summary:
-        if row.get('assets_origin_number'):
-            row['assets_origin_number'] = row['assets_origin_number'].replace('\n', '<br>')
+        # if row.get('assets_origin_number'):
+        #     row['assets_origin_number'] = row['assets_origin_number'].replace('\n', '<br>')
 
         desc = row.get('assets_description', '')
 
         soup = BeautifulSoup(desc, 'html.parser')
-        if any(k in row.get('item_name', '') for k in ['لابتوب', 'شاشة', 'حاسب', 'حاسوب','موبايل']):
+        # if row['item_name'] == 'براد مكتبي':
+        #     breakpoint()
+        # if any(k in row.get('item_name', '') for k in ['لابتوب', 'شاشة', 'حاسب', 'حاسوب','موبايل']) or row['item_type']=='اليات' or row['item_type']=='اليات':
+        if row['item_type']!='أسلحة و معدات حماية' and desc:
             for td in soup.find_all('td'):
                 if td.get_text(strip=True) == 'الشركة المصنعة':
                     # Get the previous sibling td (the one before this td)
@@ -483,27 +484,32 @@ def get_employee_assets(employee):
         else:
             row['item_name_with_manufacturer'] = row['item_name']
 
-        keep_keys = ['نوع المعالج', 'حجم الرامات', 'مواصفات الهارد', 'ملحقات', 'القياس']
-        # Find all rows and collect those to KEEP (NOT remove)
-        rows_to_keep = []
-        tables = soup.find_all('table')
-        processed_tables = []
+        keep_keys = ['الشركة المصنعة','نوع المعالج', 'حجم الرامات', 'مواصفات الهارد', 'ملحقات',
+                     'القياس','سنة الصنع','نوع الوقود', "بلد المنشا",'عيار الذخيرة','عدد المخازن','الملحقات']
 
-        for table in tables:
-            rows_to_keep = []
+        # Find all rows and collect those to KEEP (NOT remove)
+        tables = soup.find_all('table')
+        quantity_found = False
+        if tables:
+            table = tables[0]
             rows = table.find_all('tr')
             
+            rows_to_keep = []
             for table_row in rows:
                 cells = table_row.find_all('td')
                 if len(cells) >= 2:
                     key_cell = cells[1] if len(cells) > 1 else None
                     if key_cell:
                         key_text = key_cell.get_text(strip=True)
+                        if 'العدد' == key_text.strip():
+                            quantity_found = True
+                            row['total_quantity'] = cells[0].get_text(strip=True)
                         if key_text in keep_keys:
                             rows_to_keep.append(table_row)
                 else:
                     rows_to_keep.append(table_row)
-            
+            if not quantity_found:
+                row['total_quantity'] = row['asset_quantity']
             # Create a new table with kept rows
             if rows_to_keep:
                 # Create new table with same attributes
@@ -516,13 +522,115 @@ def get_employee_assets(employee):
                 for table_row in rows_to_keep:
                     new_table.append(table_row)
                 
-                processed_tables.append(str(new_table))
-
-        row['assets_description'] = '<br>'.join(processed_tables)
+                
+            row['assets_description'] = str(new_table)
 
     assets_summary = sorted(assets_summary, key=lambda x: x.get('assets_description', ''),reverse=True)
     return assets_summary
 
+def get_asset_description_by_id(asset_id):
+    """
+    Get asset description with only specified fields
+    """
+    from bs4 import BeautifulSoup
+    
+    asset = frappe.db.sql(r"""
+        SELECT 
+            custom_origin_number AS assets_origin_number,
+            custom_description AS assets_description,
+            custom_color AS color,
+            custom_extensions AS extensions,
+            asset_quantity,
+            custom_model AS model,
+            asset_category AS item_type
+        FROM 
+            `tabAsset`
+        WHERE 
+            name = %(asset_id)s
+            AND status NOT IN ('Scrapped', 'Disposed', 'Sold')
+    """, {"asset_id": asset_id}, as_dict=True)
+    
+    if not asset:
+        return None
+    
+    asset = asset[0]
+    desc = asset.get('assets_description', '')
+    soup = BeautifulSoup(desc, 'html.parser')
+    
+    # Define keys to keep
+    keep_keys = [
+        'الشركة المصنعة', 'نوع المعالج', 'حجم الرامات', 'مواصفات الهارد', 'ملحقات',
+        'القياس', 'سنة الصنع', 'نوع الوقود', 'بلد المنشا', 'عيار الذخيرة', 
+        'عدد المخازن', 'الملحقات'
+    ]
+    
+    # Start building HTML
+    html = '''
+    <div style="direction: rtl; text-align: right;">
+        <table class="table table-bordered">
+            <tbody>
+    '''
+    
+    # Add basic fields
+    basic_data = [
+        ('رقم المنشأ', asset.get('assets_origin_number', '')),
+        ('اللون', asset.get('color', '')),
+        ('الملحقات', asset.get('extensions', '')),
+        ('الموديل', asset.get('model', '')),
+        ('العدد', str(asset.get('asset_quantity', '')))
+    ]
+    
+    for key, value in basic_data:
+        if value:
+            html += f'''
+                <tr>
+                    <td style="text-align: right; font-weight: bold;">{key}</td>
+                    <td style="text-align: right;">{value}</td>
+                </tr>
+            '''
+    
+    # Add filtered description fields
+    if desc:
+        desc_table = soup.find('table')
+        if desc_table:
+            rows = desc_table.find_all('tr')
+            for row in rows:
+                cells = row.find_all('td')
+                if len(cells) >= 2:
+                    key = cells[1].get_text(strip=True) if cells[1] else ''
+                    value = cells[0].get_text(strip=True) if cells[0] else ''
+                    
+                    if key and value and key in keep_keys:
+                        html += f'''
+                <tr>
+                    <td style="text-align: right; font-weight: bold;">{key}</td>
+                    <td style="text-align: right;">{value}</td>
+                </tr>
+                        '''
+    
+    # Close HTML
+    html += '''
+            </tbody>
+        </table>
+    </div>
+    '''
+    
+    return html
+@frappe.whitelist()
+def fetch_asset_description_by_id(asset_id):
+    """
+    API endpoint to fetch asset details
+    Called from client-side script
+    """
+    if not asset_id:
+        return []
+    
+    try:
+        details = get_asset_description_by_id(asset_id)
+        return details
+    except Exception as e:
+        frappe.log_error(f"Error fetching details for {asset_id}: {str(e)}")
+        frappe.throw("Failed to fetch details: {0}").format(str(e))
 
 @frappe.whitelist()
 def fetch_employee_assets(employee):
@@ -538,7 +646,7 @@ def fetch_employee_assets(employee):
         return assets
     except Exception as e:
         frappe.log_error(f"Error fetching assets for {employee}: {str(e)}")
-        frappe.throw(_("Failed to fetch assets: {0}").format(str(e)))
+        frappe.throw("Failed to fetch assets: {0}").format(str(e))
         
 from datetime import datetime
 from hijridate import Gregorian
@@ -559,6 +667,12 @@ def get_hijri_date(date_str):
     """API endpoint for client-side calls"""
     hijri, gregorian = gregorian_to_hijri(date_str)
     return {"hijri": hijri, "gregorian": gregorian}
+
+@frappe.whitelist()
+def convert_table(date_str):
+    """API endpoint for client-side calls"""
+    text = convert_table_to_text(date_str)
+    return { "text": text}
 
 
 import frappe
@@ -650,3 +764,302 @@ def get_department_head_approver(employee):
     }
     
     
+import re
+from bs4 import BeautifulSoup
+
+def convert_table_to_text(html_content):
+    """
+    Convert HTML table to plain text format
+    """
+    soup = BeautifulSoup(html_content, 'html.parser')
+    table = soup.find('table')
+    
+    if not table:
+        return html_content
+    
+    # Extract all text from table cells
+    rows = table.find_all('tr')
+    text_output = []
+    
+    for row in rows:
+        cells = row.find_all('td')
+        row_text = []
+        for cell in cells:
+            # Get text from cell and strip whitespace
+            cell_text = cell.get_text(strip=True)
+            if cell_text:
+                row_text.append(cell_text)
+        
+        if row_text:
+            text_output.append(' : '.join(row_text))
+    
+    return '<br>'.join(text_output)
+
+
+import re
+
+def normalize_state(state):
+    """Normalize state for case-insensitive comparison"""
+    return state.lower().strip() if state else ''
+
+def find_matching_state(existing_states, target_state):
+    """Find a state in existing_states that matches target_state case-insensitively"""
+    target_normalized = normalize_state(target_state)
+    for state in existing_states:
+        if normalize_state(state) == target_normalized:
+            return state
+    return None
+
+def replace_state(result, old_state, new_state):
+    """Replace old_state with new_state in workflow transitions (case-insensitive)"""
+    updated_result = []
+    old_normalized = normalize_state(old_state)
+    
+    for state, next_states in result:
+        # Replace in current state
+        current_state = new_state if normalize_state(state) == old_normalized else state
+        
+        # Replace in next states
+        updated_next = []
+        for next_state in next_states:
+            if normalize_state(next_state) == old_normalized:
+                updated_next.append(new_state)
+            else:
+                updated_next.append(next_state)
+        
+        updated_result.append((current_state, tuple(updated_next)))
+    
+    # Remove duplicates if any (case-insensitive)
+    seen_normalized = set()
+    final_result = []
+    for state, next_states in updated_result:
+        state_normalized = normalize_state(state)
+        if state_normalized not in seen_normalized:
+            seen_normalized.add(state_normalized)
+            final_result.append((state, next_states))
+    
+    return final_result
+
+
+@frappe.whitelist()
+def get_workflow_states(workflow_name, docname=None):
+    """
+    Get workflow states with filtering for rejection states (case-insensitive).
+    """
+    
+    workflow = frappe.get_doc('Workflow', workflow_name)
+    
+    # Get current workflow_state
+    workflow_state = None
+    doctype = workflow.document_type
+    if doctype and docname:
+        doc = frappe.get_doc(doctype, docname)
+        workflow_state = frappe.db.get_value(doctype, docname, 'workflow_state')
+
+    ordered_transitions = [(tran.state, tran.next_state) for tran in workflow.transitions 
+                            if tran.state == "Draft" or
+                                evaluate_condition(tran.condition, doc)]
+
+    flows = get_complete_workflow_paths(ordered_transitions)
+    # Remove duplicates from flows
+    unique_flows = []
+    for flow in flows:
+        if flow not in unique_flows:
+            unique_flows.append(flow)
+
+    transitions = {}
+    for flow in flows:
+        for i in range(len(flow) - 1):
+            current = flow[i]
+            next_state = flow[i + 1]
+            
+            if current not in transitions:
+                transitions[current] = set()
+            transitions[current].add(next_state)
+    # Get all states
+    all_states = set()
+    for flow in flows:
+        all_states.update(flow)
+
+    # Get state order from workflow.states
+    state_order = {}
+    for idx, state in enumerate(workflow.states):
+        state_order[state.state] = idx
+    
+    # Define rejection keywords (lowercase for case-insensitive matching)
+    rejection_pattern = re.compile(r'reject', re.IGNORECASE)
+    
+    def is_rejection_state(state):
+        """Check if a state is a rejection state (case-insensitive)"""
+        return bool(rejection_pattern.search(state))
+    
+    # Filter states based on rejection rules
+    filtered_states = set()
+    for state in all_states:
+        if is_rejection_state(state):
+            # Only include rejection state if it matches current workflow_state (case-insensitive)
+            if workflow_state and normalize_state(state) == normalize_state(workflow_state):
+                filtered_states.add(state)
+        else:
+            # Always include non-rejection states
+            filtered_states.add(state)
+    
+    # Build result
+    result = []
+    for state in sorted(filtered_states, key=lambda x: state_order.get(x, 999)):
+        if state in transitions:
+            filtered_next_states = set()
+            for next_state in transitions[state]:
+                if is_rejection_state(next_state):
+                    if workflow_state and normalize_state(next_state) == normalize_state(workflow_state):
+                        filtered_next_states.add(next_state)
+                else:
+                    filtered_next_states.add(next_state)
+            
+            sorted_next_states = sorted(filtered_next_states, key=lambda x: state_order.get(x, 999))
+            result.append((state, tuple(sorted_next_states)))
+        else:
+            result.append((state, tuple()))
+
+    # Handle rejection states replacement
+    rejection_states = [state for state, _ in result if is_rejection_state(state)]
+    if rejection_states:
+        rejection_state = rejection_states[0]
+        
+        # Find matching approve state (case-insensitive)
+        approve_state = None
+        approve_pattern = rejection_pattern.sub('Approved', rejection_state, count=1)
+        
+        # Try to find matching approve state in all_states
+        approve_state = find_matching_state(all_states, approve_pattern)
+        
+        if not approve_state:
+            # Try alternative patterns
+            for pattern in [rejection_state.replace('Rejected', 'Approved'),
+                           rejection_state.replace('rejected', 'approved'),
+                           rejection_state.replace('REJECTED', 'APPROVED'),
+                           'Approved']:
+                approve_state = find_matching_state(all_states, pattern)
+                if approve_state:
+                    break
+        
+        if approve_state:
+            new_result = replace_state(result, approve_state, rejection_state)
+            return new_result
+    return result
+
+
+def evaluate_condition(condition, doc):
+    """
+    Evaluate condition - session.user comparisons always True
+    Handles AND/OR by splitting the condition
+    """
+    
+    # Helper to evaluate a single condition part
+    def eval_part(part):
+        part = part.strip()
+        if 'frappe.session.user' in part or 'frappe.user.session' in part:
+            # Session user comparison always returns True for ==
+            if '==' in part and '!=' not in part:
+                return True
+            elif '!=' in part:
+                return False
+            return True
+        # Evaluate non-session conditions
+        return eval(part, {'doc': doc, 'frappe': frappe})
+    
+    # Split by AND
+    if ' and ' in condition.lower():
+        parts = re.split(r'\s+and\s+', condition, flags=re.IGNORECASE)
+        return all(eval_part(part) for part in parts)
+    
+    # Split by OR
+    elif ' or ' in condition.lower():
+        parts = re.split(r'\s+or\s+', condition, flags=re.IGNORECASE)
+        return any(eval_part(part) for part in parts)
+    
+    # Single condition
+    else:
+        return eval_part(condition)
+
+
+def get_complete_workflow_paths(ordered_transitions):
+    
+    """
+    Generate all complete workflow paths from start states to end states
+    
+    Args:
+        ordered_transitions: List of tuples [(from_state, to_state), ...]
+    
+    Returns:
+        List of complete paths from start to end
+    """
+    # Build adjacency list
+    transitions_dict = {}
+    all_states = set()
+    
+    for from_state, to_state in ordered_transitions:
+        if from_state not in transitions_dict:
+            transitions_dict[from_state] = []
+        transitions_dict[from_state].append(to_state)
+        all_states.add(from_state)
+        all_states.add(to_state)
+    
+    # Find start states (states that never appear as 'to' except as 'from')
+    to_states = {to for _, to in ordered_transitions}
+    start_states = all_states - to_states
+    
+    # Find end states (states that never appear as 'from')
+    from_states = {from_state for from_state, _ in ordered_transitions}
+    end_states = all_states - from_states
+    
+    # Generate all paths from start to end
+    def find_paths(current_state, path):
+        """Recursively find all paths from current_state to end states"""
+        paths = []
+        
+        if current_state in end_states:
+            return [path + [current_state]]
+        
+        if current_state not in transitions_dict:
+            return [path + [current_state]]
+        
+        for next_state in transitions_dict[current_state]:
+            if next_state not in path:  # Avoid cycles
+                extended_paths = find_paths(next_state, path + [current_state])
+                paths.extend(extended_paths)
+        
+        return paths
+    
+    # Get all paths from all start states
+    all_paths = []
+    for start in start_states:
+        paths = find_paths(start, [])
+        all_paths.extend(paths)
+    
+    return all_paths
+
+@frappe.whitelist()
+def get_reserved_slots(start_date=None, end_date=None):
+    """
+    Whitelisted API to fetch car wash reservations.
+    Runs with ignore_permissions to show all bookings regardless of user role.
+    ⚠️ Use cautiously - ensure this endpoint is not exposed publicly.
+    """
+    if not start_date or not end_date:
+        return []
+
+    
+    slots = frappe.get_all(
+        'Request Car Wash',
+        fields=['name', 'request_date', 'employee_name', 'status'],  # Add fields you need
+        filters=[
+            ['request_date', '>=', f'{start_date} 00:00:00'],
+            ['request_date', '<=', f'{end_date} 23:59:59']
+        ],
+        order_by='request_date asc',
+        limit=500,
+        ignore_permissions=True  # 👈 This bypasses permission checks
+    )
+    slots = [slot['request_date'].strftime('%Y-%m-%d %H:%M:%S') for slot in slots ]
+    return slots

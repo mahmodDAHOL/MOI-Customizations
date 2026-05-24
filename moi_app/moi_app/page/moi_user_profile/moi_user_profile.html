@@ -1,0 +1,311 @@
+<div class="moi-profile-page {{ direction }}">
+    <div class="moi-container">
+
+        <!-- HEADER -->
+        <section class="moi-header-card">
+            <div class="moi-header-glow"></div>
+
+            <div class="moi-header-content">
+                <div class="moi-user-section">
+                    <div class="moi-avatar-wrapper">
+                        <img src="{{ user_image }}" alt="{{ full_name }}" class="moi-avatar">
+                    </div>
+
+                    <div class="moi-user-details">
+                        <div class="moi-user-top-row">
+                            <h1 class="moi-user-name">{{ full_name }}</h1>
+                            <span class="moi-status-badge">{{ labels.active_employee }}</span>
+                        </div>
+
+                        <div class="moi-user-meta">
+                            <span>{{ ministry }}</span>
+                            <span class="moi-meta-divider"></span>
+                            <span>{{ department }}</span>
+                            <span class="moi-meta-divider"></span>
+                            <span>{{ designation }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="moi-header-actions">
+                    <button class="moi-btn moi-btn-primary moi-edit-profile-btn">
+                        {{ labels.edit_profile }}
+                    </button>
+
+                    <button class="moi-btn moi-btn-soft moi-user-settings-btn">
+                        {{ labels.user_settings }}
+                    </button>
+
+                    <button class="moi-btn moi-btn-outline moi-leaderboard-btn">
+                        {{ labels.leaderboard }}
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STATS -->
+        <section class="moi-stats-grid">
+            <div class="moi-stat-card">
+                <div class="moi-stat-icon-wrapper moi-blue">⚡</div>
+                <div class="moi-stat-content">
+                    <div class="moi-stat-label">{{ labels.energy_points }}</div>
+                    <div class="moi-stat-value">{{ energy_points }}</div>
+                    <div class="moi-stat-footer">+{{ monthly_points }} {{ labels.this_month }}</div>
+                </div>
+            </div>
+
+            <div class="moi-stat-card">
+                <div class="moi-stat-icon-wrapper moi-gold">🏆</div>
+                <div class="moi-stat-content">
+                    <div class="moi-stat-label">{{ labels.rank }}</div>
+                    <div class="moi-stat-value">#{{ rank }}</div>
+                    <div class="moi-stat-footer">{{ labels.overall_rank }}</div>
+                </div>
+            </div>
+
+            <div class="moi-stat-card">
+                <div class="moi-stat-icon-wrapper moi-purple">📈</div>
+                <div class="moi-stat-content">
+                    <div class="moi-stat-label">{{ labels.monthly_rank }}</div>
+                    <div class="moi-stat-value">#{{ monthly_rank }}</div>
+                    <div class="moi-stat-footer">{{ labels.this_month }}</div>
+                </div>
+            </div>
+
+            <div class="moi-stat-card">
+                <div class="moi-stat-icon-wrapper moi-orange">⏳</div>
+                <div class="moi-stat-content">
+                    <div class="moi-stat-label">{{ labels.pending_leaves }}</div>
+                    <div class="moi-stat-value">{{ pending_leaves }}</div>
+                    <div class="moi-stat-footer">{{ labels.pending }}</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TOP DASHBOARD ROW -->
+        <section class="moi-side-panel">
+
+            <!-- ATTENDANCE -->
+            <div class="moi-performance-card">
+                <div class="moi-performance-top">
+                    <div>
+                        <div class="moi-performance-label">{{ labels.attendance_compliance }}</div>
+                        <div class="moi-performance-subtitle">Work attendance commitment for current month</div>
+                    </div>
+
+                    <div class="moi-performance-badge">{{ attendance_compliance }}%</div>
+                </div>
+
+                <div class="moi-performance-center">
+                    <div class="moi-performance-value">{{ attendance_compliance }}%</div>
+
+                    <div class="moi-performance-progress">
+                        <div class="moi-performance-progress-bar" style="width: {{ attendance_compliance }}%"></div>
+                    </div>
+                </div>
+
+                <div class="moi-performance-grid">
+                    <div class="moi-performance-item">
+                        <div class="moi-performance-item-label">{{ labels.expected_hours }}</div>
+                        <div class="moi-performance-item-value">{{ expected_hours }}</div>
+                    </div>
+
+                    <div class="moi-performance-item">
+                        <div class="moi-performance-item-label">{{ labels.actual_hours }}</div>
+                        <div class="moi-performance-item-value">{{ actual_hours }}</div>
+                    </div>
+
+                    <div class="moi-performance-item">
+                        <div class="moi-performance-item-label">{{ labels.unjustified_hours }}</div>
+                        <div class="moi-performance-item-value">{{ unjustified_hours }}</div>
+                    </div>
+
+                    <div class="moi-performance-item">
+                        <div class="moi-performance-item-label">{{ labels.late_entry_hours }}</div>
+                        <div class="moi-performance-item-value">{{ late_entry_hours }}</div>
+                    </div>
+
+                    <div class="moi-performance-item">
+                        <div class="moi-performance-item-label">{{ labels.exceptions }}</div>
+                        <div class="moi-performance-item-value">{{ exceptions_count }}</div>
+                    </div>
+
+                    <div class="moi-performance-item">
+                        <div class="moi-performance-item-label">{{ labels.leave_days }}</div>
+                        <div class="moi-performance-item-value">{{ leave_days }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LEAVE SUMMARY + BALANCES -->
+            <div class="moi-card moi-leave-summary-card">
+                <div class="moi-card-header-simple">
+                    <h2 class="moi-card-title moi-small-title">{{ labels.leave_summary }}</h2>
+                </div>
+
+                <div class="moi-summary-cards">
+                    <div class="moi-summary-card moi-summary-approved">
+                        <div class="moi-summary-icon">✓</div>
+                        <div class="moi-summary-number">{{ leave_summary.approved }}</div>
+                        <div class="moi-summary-label">{{ labels.approved }}</div>
+                    </div>
+
+                    <div class="moi-summary-card moi-summary-pending">
+                        <div class="moi-summary-icon">⏳</div>
+                        <div class="moi-summary-number">{{ leave_summary.pending }}</div>
+                        <div class="moi-summary-label">{{ labels.pending }}</div>
+                    </div>
+
+                    <div class="moi-summary-card moi-summary-rejected">
+                        <div class="moi-summary-icon">×</div>
+                        <div class="moi-summary-number">{{ leave_summary.rejected }}</div>
+                        <div class="moi-summary-label">{{ labels.rejected }}</div>
+                    </div>
+                </div>
+
+                <div class="moi-leave-inline-list">
+                    <div class="moi-leave-inline-divider">
+                        {{ labels.leave_balances }}
+                    </div>
+
+                    {% if (leave_balances && leave_balances.length) { %}
+                        {% for (var lb = 0; lb < leave_balances.length; lb++) { %}
+                            <div class="moi-leave-inline-item">
+                                <div class="moi-leave-inline-name">
+                                    {{ leave_balances[lb].leave_type }}
+                                </div>
+
+                                <div class="moi-leave-inline-values">
+                                    <span>
+                                        {{ labels.total_allocated }}:
+                                        <strong>{{ leave_balances[lb].total_allocated }}</strong>
+                                    </span>
+
+                                    <span>
+                                        {{ labels.available_leaves }}:
+                                        <strong>{{ leave_balances[lb].available_leaves }}</strong>
+                                    </span>
+                                </div>
+                            </div>
+                        {% } %}
+                    {% } else { %}
+                        <div class="moi-empty-state moi-empty-compact">
+                            {{ labels.no_leave_balances }}
+                        </div>
+                    {% } %}
+                </div>
+            </div>
+
+            <!-- TASKS -->
+            <div class="moi-card moi-tasks-card">
+                <div class="moi-card-header">
+                    <div>
+                        <h2 class="moi-card-title moi-small-title">{{ labels.my_tasks }}</h2>
+                        <p class="moi-card-subtitle">{{ labels.tasks_subtitle }}</p>
+                    </div>
+
+                    <button class="moi-btn moi-btn-soft moi-view-all-tasks-btn">
+                        {{ labels.view_all }}
+                    </button>
+                </div>
+
+                <div class="moi-task-list">
+                    {% if (tasks && tasks.length) { %}
+                        {% for (var t = 0; t < tasks.length; t++) { %}
+                            <div class="moi-task-item">
+                                <div class="moi-task-top">
+                                    <div class="moi-task-title">
+                                        {{ tasks[t].title }}
+                                    </div>
+
+                                    <div class="moi-task-status {{ tasks[t].status_class }}">
+                                        {{ tasks[t].status }}
+                                    </div>
+                                </div>
+
+                                <div class="moi-task-bottom">
+                                    <span>{{ labels.task_due }}: {{ tasks[t].expected_closure }}</span>
+
+                                    <span class="moi-task-priority {{ tasks[t].priority_class }}">
+                                        {{ tasks[t].priority }}
+                                    </span>
+                                </div>
+
+                                <button
+                                    class="moi-task-open-btn"
+                                    data-doctype="{{ tasks[t].reference_type }}"
+                                    data-docname="{{ tasks[t].reference_name }}"
+                                >
+                                    {{ labels.view_task }}
+                                </button>
+                            </div>
+                        {% } %}
+                    {% } else { %}
+                        <div class="moi-empty-state">{{ labels.no_tasks }}</div>
+                    {% } %}
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ENERGY CHART -->
+        <section class="moi-main-grid">
+            <div class="moi-card moi-chart-card">
+                <div class="moi-card-header">
+                    <div>
+                        <h2 class="moi-card-title">{{ labels.chart_title }}</h2>
+                        <p class="moi-card-subtitle">{{ labels.chart_subtitle }}</p>
+                    </div>
+
+                    <div class="moi-chart-tabs">
+                        <button class="moi-chart-tab active">{{ labels.daily }}</button>
+                        <button class="moi-chart-tab">{{ labels.weekly }}</button>
+                        <button class="moi-chart-tab">{{ labels.monthly }}</button>
+                    </div>
+                </div>
+
+                <div class="moi-chart-container">
+                    <div class="moi-empty-state">
+                        {{ labels.no_chart_data }}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ACTIVITY -->
+        <section class="moi-card moi-activity-section">
+            <div class="moi-card-header">
+                <div>
+                    <h2 class="moi-card-title">{{ labels.recent_activity }}</h2>
+                    <p class="moi-card-subtitle">{{ labels.activity_subtitle }}</p>
+                </div>
+
+                <button class="moi-btn moi-btn-soft moi-view-all-btn">
+                    {{ labels.view_all }}
+                </button>
+            </div>
+
+            <div class="moi-activity-grid">
+                {% if (recent_activity && recent_activity.length) { %}
+                    {% for (var a = 0; a < recent_activity.length; a++) { %}
+                        <div class="moi-activity-card">
+                            <div class="moi-activity-left">
+                                <div class="moi-activity-icon">⚡</div>
+
+                                <div class="moi-activity-content">
+                                    <div class="moi-activity-title">{{ recent_activity[a].title }}</div>
+                                    <div class="moi-activity-time">{{ recent_activity[a].time }}</div>
+                                </div>
+                            </div>
+
+                            <div class="moi-activity-points">{{ recent_activity[a].points }}</div>
+                        </div>
+                    {% } %}
+                {% } else { %}
+                    <div class="moi-empty-state">{{ labels.no_activity }}</div>
+                {% } %}
+            </div>
+        </section>
+
+    </div>
+</div>

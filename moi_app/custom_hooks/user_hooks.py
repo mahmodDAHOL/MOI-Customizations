@@ -8,7 +8,7 @@ def cleanup_employee_permissions_on_user_update(doc, method=None):
     """
 
     # Check if user has any of the specified roles
-    target_roles = ["HR User", "HR Manager", "Asset manager", "Head of Department", "Employee"]
+    target_roles = ["HR User", "HR Manager", "Asset manager", "Technician", "Shared-Services-Other",'Shared-Services-Vehicles','Shared-Services-Stock']
 
     # Get user's roles
     if hasattr(doc, 'roles') and doc.roles:

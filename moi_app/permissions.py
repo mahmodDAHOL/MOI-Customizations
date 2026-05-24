@@ -2,34 +2,7 @@
 
 import frappe
 
-def get_permission_query_conditions_for_asset(user):
-    """Restrict Head of Department to their department only"""
-    if not user:
-        user = frappe.session.user
-    
-    # Skip for System Manager/Administrator
-    if any(role in frappe.get_roles(user) for role in ["System Manager","Asset manager", "Administrator"]):
-        return ""
-    
-    # Get user's department
-    user_department = frappe.db.get_value("Employee", {"user_id": user}, "department")
-    
-    if not user_department:
-        # If user has no department assigned, show nothing
-        return "(`tabAsset`.department IS NULL AND 1=0)"
-    
-    # For Head of Department - only their department
-    if "Head of Department" in frappe.get_roles(user):
-        # Get child departments if hierarchical structure exists
-        child_departments = ""
-        
-        if child_departments:
-            departments_list = ", ".join([f"'{dept}'" for dept in child_departments])
-            return f"""(`tabAsset`.department IN ({departments_list}))"""
-        else:
-            return f"""(`tabAsset`.department = '{user_department}')"""
-    
-    return ""
+
 
 def get_permission_query_conditions_for_employee(user):
     """Restrict Head of Department to employees in their department only"""
@@ -43,6 +16,8 @@ def get_permission_query_conditions_for_employee(user):
     if any(role in frappe.get_roles(user) for role in ["HR Manager","HR User"]):
         return f"""(`tabEmployee`.company = 'Ministry of Information')"""
     
+    emp_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
+    # return f"""(`tabEmployee`.name = '{emp_id}')"""
     # Get user's department and employee ID
     user_department = frappe.db.get_value("Employee", {"user_id": user}, "department")
     emp_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
@@ -158,14 +133,19 @@ def material_request_query_condition(user=None):
     # Approvers need to see ALL requests for workflow approval
     approver_roles = {
         "Finance-Officer", 
-        "Asset manager", 
         "Purchase Manager",
         "System Manager", 
         "Administrator"
     }
+    # all([frappe.db.get_value('Item', i.item_code, 'is_fixed_asset') for i in doc.items])
     if set(frappe.get_roles(user)) & approver_roles:
         return ""  # No restriction - see all Material Requests
-    
+    if "Asset manager" in frappe.get_roles(user):
+        return f"`tabMaterial Request`.custom_is_all_items_are_assets = '1'"
+
+    if "Shared-Services-Stock" in frappe.get_roles(user):
+        return f"`tabMaterial Request`.custom_is_all_items_are_assets = '0'"
+
     # Regular users: see own requests + requests for their subordinates
     employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
     if not employee:
@@ -196,12 +176,7 @@ def asset_query_condition(user=None):
     
     # Get user's roles
     user_roles = set(frappe.get_roles(user))
-    
-    # Block HR roles from seeing assets
-    hr_roles = {"HR Manager", "HR User"}
-    if user_roles & hr_roles:
-        return "1=0"  # Returns no assets for HR users
-    
+
     # Full access for asset managers
     asset_privileged_roles = {"Asset manager", "System Manager", "Administrator"}
     if user_roles & asset_privileged_roles:
@@ -288,3 +263,188 @@ def employee_query_condition(user=None):
 
     employee_list_str = ", ".join(employee_list)
     return f"`tabEmployee`.name IN ({employee_list_str})"
+
+
+def vehicle_query_conditions(user):
+    """Return conditions to filter Vehicle records based on user role"""
+    
+    # Check if user has Shared-Services-Vehicles role
+    user_roles = frappe.get_roles(user)
+    
+    if "Shared-Services-Vehicles" in user_roles:
+        return ""
+    
+    # For all other roles, only show vehicles owned by the user
+    # First, find which Employee is linked to this user
+    employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
+    
+    if not employee:
+        # If no linked employee, return no records
+        return "1=0"
+    
+    # Return condition: only show vehicles where owner matches the employee
+    return f"`tabVehicle`.employee = '{employee}'"
+
+def request_for_machinery_maintenance_query_conditions(user):
+    """Return conditions to filter Vehicle records based on user role"""
+    
+    # Check if user has Shared-Services-Vehicles role
+    user_roles = frappe.get_roles(user)
+    
+    if "Shared-Services-Vehicles" in user_roles:
+        return ""
+    
+    # For all other roles, only show vehicles owned by the user
+    # First, find which Employee is linked to this user
+    employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
+    
+    if not employee:
+        # If no linked employee, return no records
+        return "1=0"
+    
+    # Return condition: only show vehicles where owner matches the employee
+    return f"`tabRequest for Machinery Maintenance`.employee = '{employee}'"
+
+def request_car_wash_query_conditions(user):
+    """Return conditions to filter Vehicle records based on user role"""
+    
+    # Check if user has Shared-Services-Vehicles role
+    user_roles = frappe.get_roles(user)
+    
+    if "Shared-Services-Vehicles" in user_roles:
+        return ""
+    
+    # For all other roles, only show vehicles owned by the user
+    # First, find which Employee is linked to this user
+    employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
+    
+    if not employee:
+        # If no linked employee, return no records
+        return "1=0"
+    
+    # Return condition: only show vehicles where owner matches the employee
+    return f"`tabRequest Car Wash`.employee_name = '{employee}'"
+
+def request_a_vehicle_reservation_query_conditions(user):
+    """Return conditions to filter Vehicle records based on user role"""
+    
+    # Check if user has Shared-Services-Vehicles role
+    user_roles = frappe.get_roles(user)
+    
+    if "Shared-Services-Vehicles" in user_roles:
+        return ""
+    
+    # For all other roles, only show vehicles owned by the user
+    # First, find which Employee is linked to this user
+    employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
+    
+    if not employee:
+        # If no linked employee, return no records
+        return "1=0"
+    
+    # Return condition: only show vehicles where owner matches the employee
+    return f"`tabRequest a vehicle reservation`.employee_name = '{employee}'"
+
+def technical_committee_receiving_minutes_query_conditions(user):
+    """Return conditions to filter Vehicle records based on user role"""
+    
+    # Check if user has Shared-Services-Vehicles role
+    user_roles = frappe.get_roles(user)
+    
+    if "Shared-Services-Vehicles" in user_roles:
+        return ""
+    
+    # For all other roles, only show vehicles owned by the user
+    # First, find which Employee is linked to this user
+    employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
+    
+    if not employee:
+        # If no linked employee, return no records
+        return "1=0"
+    
+    # Return condition: only show vehicles where owner matches the employee
+    return f"`tabTechnical Committee Receiving Minutes`.driver = '{employee}'"
+
+def request_for_an_oil_change_from_the_central_garage_query_conditions(user):
+    """Return conditions to filter Vehicle records based on user role"""
+    
+    # Check if user has Shared-Services-Vehicles role
+    user_roles = frappe.get_roles(user)
+    
+    if "Shared-Services-Vehicles" in user_roles:
+        return ""
+    
+    # For all other roles, only show vehicles owned by the user
+    # First, find which Employee is linked to this user
+    employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
+    
+    if not employee:
+        # If no linked employee, return no records
+        return "1=0"
+    
+    # Return condition: only show vehicles where owner matches the employee
+    return f"`tabRequest for an Oil Change from the Central Garage`.full_name = '{employee}'"
+
+def cleaning_company_performance_evaluation_query_conditions(user):
+    """Return conditions to filter Vehicle records based on user role"""
+    
+    # Check if user has Shared-Services-Vehicles role
+    user_roles = frappe.get_roles(user)
+    
+    if "Shared-Services-Stock" in user_roles:
+        return ""
+    
+    # For all other roles, only show vehicles owned by the user
+    # First, find which Employee is linked to this user
+    employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
+    
+    if not employee:
+        # If no linked employee, return no records
+        return "1=0"
+    
+    # Return condition: only show vehicles where owner matches the employee
+    return f"`tabCleaning Company Performance Evaluation`.employee_name = '{employee}'"
+
+def leave_application_query_conditions(user):
+    """Return conditions to filter Vehicle records based on user role"""
+    # Skip restrictions for privileged roles
+    privileged_roles = {"HR Manager", "HR User","System Manager", "Administrator"}
+    if set(frappe.get_roles(user)) & privileged_roles:
+        return ""
+
+    employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
+    if not employee:
+        return f"`tabLeave Application`.owner = '{user}'"
+    
+    # Get subordinates
+    subordinates = frappe.db.get_list(
+        "Employee",
+        filters={"reports_to": employee},
+        pluck="name"
+    )
+    subordinates.append(employee)  # Include self
+    
+    emp_list = ", ".join(f"'{e}'" for e in subordinates)
+    return f"(`tabLeave Application`.employee IN ({emp_list}) OR `tabLeave Application`.owner = '{user}')"
+
+def attendance_request_query_conditions(user):
+    """Return conditions to filter Vehicle records based on user role"""
+    # Skip restrictions for privileged roles
+    privileged_roles = {"HR Manager", "HR User","System Manager", "Administrator"}
+    if set(frappe.get_roles(user)) & privileged_roles:
+        return ""
+
+    employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
+    if not employee:
+        return f"`tabAttendance Request`.owner = '{user}'"
+    
+    # Get subordinates
+    subordinates = frappe.db.get_list(
+        "Employee",
+        filters={"reports_to": employee},
+        pluck="name"
+    )
+    subordinates.append(employee)  # Include self
+    
+    emp_list = ", ".join(f"'{e}'" for e in subordinates)
+    return f"(`tabAttendance Request`.employee IN ({emp_list}) OR `tabAttendance Request`.owner = '{user}')"
