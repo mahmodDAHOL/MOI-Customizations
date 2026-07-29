@@ -1,11 +1,13 @@
 import pyqrcode
 import io
-import frappe
 import base64
 import re
 import os
 from frappe.utils.file_manager import save_file
 from urllib.parse import urlparse
+import frappe
+from frappe.utils.pdf import get_pdf
+from pypdf import PdfReader, PdfWriter
 
 from bs4 import BeautifulSoup
 
@@ -64,33 +66,51 @@ def to_eastern_arabic_numerals(n):
 import asyncio
 from playwright.async_api import async_playwright
 
-async def _html_to_pdf_bytes(html_content: str) -> bytes:
-    """Convert HTML string to PDF bytes using Playwright (Chromium)."""
+async def _html_to_pdf_bytes(html_content):
+    """
+    Convert HTML to PDF bytes using Playwright with large content handling.
+    """
     async with async_playwright() as p:
         browser = await p.chromium.launch(
-            args=["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage"]
+            headless=True,
+            args=[
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--no-sandbox',
+                '--disable-software-rasterizer'
+            ]
         )
+        
         page = await browser.new_page()
-
-        # Set viewport to match A4 size (optional but recommended)
-        await page.set_viewport_size({"width": 794, "height": 1123})
-
-        # Set content
-        await page.set_content(html_content)
-        # await page.screenshot(path="mahmod.png")
-        # Generate PDF with high-fidelity settings
-        pdf_bytes = await page.pdf(
-            scale=1.0,
-            print_background=True,
-            width="210mm",
-            height="297mm",
-            margin={"top": "0px", "bottom": "0px", "left": "0px", "right": "0px"},
-            display_header_footer=True,
-            prefer_css_page_size=True
-        )
-
-        await browser.close()
-        return pdf_bytes
+        
+        try:
+            # Write HTML directly using evaluate
+            await page.evaluate("""
+                (html) => {
+                    document.open();
+                    document.write(html);
+                    document.close();
+                }
+            """, html_content)
+            
+            # Wait for any dynamic content
+            await page.wait_for_timeout(1000)
+            
+            # Generate PDF
+            pdf_data = await page.pdf(
+                format='A4',
+                print_background=True,
+                prefer_css_page_size=True
+            )
+            
+            return pdf_data
+            
+        except Exception as e:
+            frappe.log_error(f"PDF Error: {str(e)}", "PDF Generation")
+            raise
+            
+        finally:
+            await browser.close()
 
 def html_to_pdf(html_content: str) -> bytes:
     """
@@ -472,6 +492,9 @@ def get_employee_assets(employee):
         # if row['item_name'] == 'براد مكتبي':
         #     breakpoint()
         # if any(k in row.get('item_name', '') for k in ['لابتوب', 'شاشة', 'حاسب', 'حاسوب','موبايل']) or row['item_type']=='اليات' or row['item_type']=='اليات':
+        row['item_name_with_manufacturer'] = row['item_name']
+        row['manufacturer'] = ''
+
         if row['item_type']!='أسلحة و معدات حماية' and desc:
             for td in soup.find_all('td'):
                 if td.get_text(strip=True) == 'الشركة المصنعة':
@@ -480,9 +503,7 @@ def get_employee_assets(employee):
                     if prev_td:
                         manufacturer = prev_td.get_text(strip=True)
                         row['manufacturer'] = manufacturer
-                        row['item_name_with_manufacturer'] = f"{row['item_name']} \n {manufacturer}" if manufacturer else row['item_name']
-        else:
-            row['item_name_with_manufacturer'] = row['item_name']
+                        row['item_name_with_manufacturer'] = f"{row['item_name']} \n {manufacturer}"
 
         keep_keys = ['الشركة المصنعة','نوع المعالج', 'حجم الرامات', 'مواصفات الهارد', 'ملحقات',
                      'القياس','سنة الصنع','نوع الوقود', "بلد المنشا",'عيار الذخيرة','عدد المخازن','الملحقات']
@@ -521,9 +542,8 @@ def get_employee_assets(employee):
                 # Add kept rows
                 for table_row in rows_to_keep:
                     new_table.append(table_row)
-                
-                
-            row['assets_description'] = str(new_table)
+            
+                row['assets_description'] = str(new_table)
 
     assets_summary = sorted(assets_summary, key=lambda x: x.get('assets_description', ''),reverse=True)
     return assets_summary
@@ -681,18 +701,52 @@ import frappe
 def get_department_head_approver(employee):
     """
     Traverse reporting chain upwards to find first user with 'Head of Department' role.
+    First checks if the applicant themselves has the role.
     Returns: {'user_id': 'user@domain.com'} or {'error': 'message'}
     """
-    if not employee:
+    # Treat empty, null-like or explicit "None"/"null" strings as missing
+    if not employee or str(employee).strip().lower() in ("none", "null", ""):
         return {"error": _("No employee specified")}
     
     # Validate employee exists
     if not frappe.db.exists("Employee", employee):
         return {"error": _("Employee {0} not found").format(employee)}
     
+    # STEP 1: Check if the applicant themselves has "Head of Department" role
+    applicant_user = frappe.db.get_value("Employee", employee, "user_id")
+    if applicant_user:
+        if frappe.db.exists("User", applicant_user):
+            try:
+                if "Head of Department" in frappe.get_roles(applicant_user):
+                    # Verify this user is actually the department head
+                    applicant_dept = frappe.db.get_value("Employee", employee, "department")
+                    if applicant_dept:
+                        dept_head = frappe.db.get_value("Department", applicant_dept, "department_head")
+                        if dept_head == applicant_user:
+                            return {
+                                "user_id": applicant_user,
+                                "level": 0,
+                                "verified": True,
+                                "source": "applicant_is_department_head"
+                            }
+                    # If department_head field doesn't match but user has role
+                    return {
+                        "user_id": applicant_user,
+                        "level": 0,
+                        "verified": False,
+                        "source": "applicant_has_head_role"
+                    }
+            except Exception as e:
+                frappe.log_error(
+                    f"Error checking roles for applicant {applicant_user}: {str(e)}",
+                    "get_department_head_approver"
+                )
+    
+    # STEP 2: Traverse reporting chain to find Head of Department
     current_emp = employee
     max_depth = 10  # Prevent infinite loops in circular reporting structures
     visited = set()  # Detect circular references
+    depth = 0
     
     for depth in range(max_depth):
         # Prevent circular reference loops
@@ -733,10 +787,20 @@ def get_department_head_approver(employee):
                 if applicant_dept:
                     dept_head = frappe.db.get_value("Department", applicant_dept, "department_head")
                     if dept_head == manager_user:
-                        return {"user_id": manager_user, "level": depth + 1, "verified": True}
+                        return {
+                            "user_id": manager_user,
+                            "level": depth + 1,
+                            "verified": True,
+                            "source": "reporting_chain_verified"
+                        }
                 
                 # Fallback: Return found user even if not department_head field (role-based match)
-                return {"user_id": manager_user, "level": depth + 1, "verified": False}
+                return {
+                    "user_id": manager_user,
+                    "level": depth + 1,
+                    "verified": False,
+                    "source": "reporting_chain_role_match"
+                }
         except Exception as e:
             frappe.log_error(
                 f"Error checking roles for {manager_user}: {str(e)}",
@@ -746,21 +810,39 @@ def get_department_head_approver(employee):
         # Move up the chain
         current_emp = manager_emp
     
-    # Final fallback: Try direct department head lookup
+    # STEP 3: Final fallback - Try direct department head lookup
     applicant_dept = frappe.db.get_value("Employee", employee, "department")
     if applicant_dept:
         dept_head_user = frappe.db.get_value("Department", applicant_dept, "department_head")
         if dept_head_user and frappe.db.exists("User", dept_head_user):
-            return {
-                "user_id": dept_head_user, 
-                "level": "direct", 
-                "verified": True,
-                "source": "department_head_field"
-            }
+            # Check if this user has the Head of Department role
+            try:
+                if "Head of Department" in frappe.get_roles(dept_head_user):
+                    return {
+                        "user_id": dept_head_user,
+                        "level": "direct",
+                        "verified": True,
+                        "source": "department_head_field_with_role"
+                    }
+                else:
+                    # User is set as department head but doesn't have the role
+                    return {
+                        "user_id": dept_head_user,
+                        "level": "direct",
+                        "verified": False,
+                        "source": "department_head_field_no_role",
+                        "warning": "User does not have 'Head of Department' role"
+                    }
+            except Exception as e:
+                frappe.log_error(
+                    f"Error checking roles for department head {dept_head_user}: {str(e)}",
+                    "get_department_head_approver"
+                )
     
     return {
         "error": "No approver with 'Head of Department' role found in reporting chain (max depth: {0})".format(max_depth),
-        "chain_depth": depth + 1
+        "chain_depth": depth + 1,
+        "applicant_has_role": applicant_user and "Head of Department" in frappe.get_roles(applicant_user) if applicant_user and frappe.db.exists("User", applicant_user) else False
     }
     
     
@@ -1063,3 +1145,184 @@ def get_reserved_slots(start_date=None, end_date=None):
     )
     slots = [slot['request_date'].strftime('%Y-%m-%d %H:%M:%S') for slot in slots ]
     return slots
+
+import io
+import frappe
+from frappe.utils.pdf import get_pdf
+from pypdf import PdfReader, PdfWriter
+
+@frappe.whitelist()
+def apply_dynamic_stamp(doc_name, stamp_text):
+    """
+    Apply a stamp to a Printing Permit Request document.
+    Expects doc_name and stamp_text as arguments
+    """
+    
+    # Validate required arguments
+    if not doc_name:
+        return {"status": "error", "message": "doc_name is required"}
+    if not stamp_text:
+        return {"status": "error", "message": "stamp_text is required"}
+    
+    try:
+        # Get the document
+        doc = frappe.get_doc("Printing Permit Request", doc_name)
+        
+        # Validate that PDF exists
+        if not doc.get("attached_pdf"):
+            return {"status": "error", "message": "خطأ: يرجى إرفاق ملف PDF الأصلي قبل الاعتماد."}
+        
+        # Get the original file path
+        original_file = frappe.get_doc("File", {"file_url": doc.get("attached_pdf")})
+        original_file_path = original_file.get_full_path()
+        
+        # Get field values
+        approval_date = doc.get("approval_date") or frappe.utils.today()
+        name = doc.get("name")
+        book_title = doc.get("book_title") or ""
+        author = doc.get("author") or ""
+        
+        # Design stamp HTML
+        stamp_html = f"""
+        <html>
+        <head>
+            <style>
+                body {{
+                    margin: 0;
+                    padding: 0;
+                    background: transparent;
+                    font-family: Arial, sans-serif;
+                }}
+                .stamp-box {{
+                    position: absolute;
+                    top: 450px;
+                    left: 150px;
+                    border: 2px solid #c9302c;
+                    color: #c9302c;
+                    padding: 15px;
+                    width: 320px;
+                    direction: rtl;
+                    background-color: rgba(255, 255, 255, 0.85);
+                    transform: rotate(-2deg);
+                }}
+                .stamp-header {{
+                    text-align: center;
+                    font-weight: bold;
+                    font-size: 14px;
+                    margin-bottom: 10px;
+                    line-height: 1.4;
+                }}
+                table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 13px;
+                    color: #c9302c;
+                }}
+                td {{
+                    padding: 3px 0;
+                    vertical-align: top;
+                }}
+                .handwritten {{
+                    color: #2c3e50;
+                    font-weight: bold;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="stamp-box">
+                <div class="stamp-header">
+                    الجمهورية العربية السورية<br>
+                    وزارة الإعلام<br>
+                    إدارةالشؤون الصحفية والتراخيص<br>
+                    دائرة المطبوعات
+                </div>
+                <table>
+                    <tr>
+                        <td style="width: 80px;">التاريخ:</td>
+                        <td class="handwritten">{approval_date}</td>
+                    </tr>
+                    <tr>
+                        <td>رقم:</td>
+                        <td class="handwritten">{name}</td>
+                    </tr>
+                    <tr>
+                        <td>اسم الكتاب:</td>
+                        <td class="handwritten">{book_title}</td>
+                    </tr>
+                    <tr>
+                        <td>المؤلف:</td>
+                        <td class="handwritten">{author}</td>
+                    </tr>
+                    <tr>
+                        <td>التأشيرة:</td>
+                        <td class="handwritten">{stamp_text}</td>
+                    </tr>
+                    <tr>
+                        <td>الاسم والتوقيع:</td>
+                        <td class="handwritten">.........................</td>
+                    </tr>
+                </table>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Convert HTML to PDF
+        pdf_options = {
+            "page-size": "A4",
+            "margin-top": "0mm",
+            "margin-bottom": "0mm",
+            "margin-left": "0mm",
+            "margin-right": "0mm",
+            "encoding": "UTF-8"
+        }
+        stamp_pdf_bytes = get_pdf(stamp_html, options=pdf_options)
+        
+        # Merge stamp with original PDF
+        original_pdf_reader = PdfReader(original_file_path)
+        stamp_pdf_reader = PdfReader(io.BytesIO(stamp_pdf_bytes))
+        pdf_writer = PdfWriter()
+        
+        # Merge first page only
+        first_page = original_pdf_reader.pages[0]
+        stamp_page = stamp_pdf_reader.pages[0]
+        first_page.merge_page(stamp_page)
+        pdf_writer.add_page(first_page)
+        
+        # Add remaining pages
+        for page_num in range(1, len(original_pdf_reader.pages)):
+            pdf_writer.add_page(original_pdf_reader.pages[page_num])
+        
+        output_buffer = io.BytesIO()
+        pdf_writer.write(output_buffer)
+        output_buffer.seek(0)
+        
+        # Save the new stamped file
+        new_file_name = f"Stamped_{doc.get('name')}.pdf"
+        stamped_file_doc = frappe.get_doc({
+            "doctype": "File",
+            "file_name": new_file_name,
+            "attached_to_doctype": "Printing Permit Request",
+            "attached_to_name": doc.get("name"),
+            "attached_to_field": "stamped_pdf",
+            "content": output_buffer.getvalue(),
+            "is_private": original_file.is_private
+        })
+        stamped_file_doc.insert(ignore_permissions=True)
+        
+        # Update the document with the stamped file URL
+        frappe.db.set_value("Printing Permit Request", doc_name, "stamped_pdf", stamped_file_doc.file_url)
+        frappe.db.commit()
+        
+        return {
+            "status": "success",
+            "message": f"تم إرفاق الختم بنجاح بحالة: {stamp_text}",
+            "stamped_pdf": stamped_file_doc.file_url
+        }
+        
+    except Exception as e:
+        frappe.log_error(f"Error applying stamp: {str(e)}", "Printing Stamp Error")
+        return {
+            "status": "error",
+            "message": f"حدث خطأ أثناء تطبيق الختم: {str(e)}"
+        }

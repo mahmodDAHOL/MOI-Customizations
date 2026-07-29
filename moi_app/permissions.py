@@ -405,10 +405,32 @@ def cleaning_company_performance_evaluation_query_conditions(user):
     # Return condition: only show vehicles where owner matches the employee
     return f"`tabCleaning Company Performance Evaluation`.employee_name = '{employee}'"
 
+def _get_indirect_subordinates(employee):
+    """Return all direct and indirect subordinates for an employee."""
+    seen = {employee}
+    queue = [employee]
+    subordinates = []
+
+    while queue:
+        current = queue.pop(0)
+        direct_reports = frappe.db.get_list(
+            "Employee",
+            filters={"reports_to": current},
+            pluck="name"
+        )
+        for sub in direct_reports:
+            if sub not in seen:
+                seen.add(sub)
+                queue.append(sub)
+                subordinates.append(sub)
+
+    return subordinates
+
+
 def leave_application_query_conditions(user):
-    """Return conditions to filter Vehicle records based on user role"""
+    """Return conditions to filter Leave Application records based on user role"""
     # Skip restrictions for privileged roles
-    privileged_roles = {"HR Manager", "HR User","System Manager", "Administrator"}
+    privileged_roles = {"HR Manager", "HR User", "System Manager", "Administrator"}
     if set(frappe.get_roles(user)) & privileged_roles:
         return ""
 
@@ -416,21 +438,16 @@ def leave_application_query_conditions(user):
     if not employee:
         return f"`tabLeave Application`.owner = '{user}'"
     
-    # Get subordinates
-    subordinates = frappe.db.get_list(
-        "Employee",
-        filters={"reports_to": employee},
-        pluck="name"
-    )
+    subordinates = _get_indirect_subordinates(employee)
     subordinates.append(employee)  # Include self
-    
     emp_list = ", ".join(f"'{e}'" for e in subordinates)
     return f"(`tabLeave Application`.employee IN ({emp_list}) OR `tabLeave Application`.owner = '{user}')"
 
+
 def attendance_request_query_conditions(user):
-    """Return conditions to filter Vehicle records based on user role"""
+    """Return conditions to filter Attendance Request records based on user role"""
     # Skip restrictions for privileged roles
-    privileged_roles = {"HR Manager", "HR User","System Manager", "Administrator"}
+    privileged_roles = {"HR Manager", "HR User", "System Manager", "Administrator"}
     if set(frappe.get_roles(user)) & privileged_roles:
         return ""
 
@@ -438,13 +455,7 @@ def attendance_request_query_conditions(user):
     if not employee:
         return f"`tabAttendance Request`.owner = '{user}'"
     
-    # Get subordinates
-    subordinates = frappe.db.get_list(
-        "Employee",
-        filters={"reports_to": employee},
-        pluck="name"
-    )
+    subordinates = _get_indirect_subordinates(employee)
     subordinates.append(employee)  # Include self
-    
     emp_list = ", ".join(f"'{e}'" for e in subordinates)
     return f"(`tabAttendance Request`.employee IN ({emp_list}) OR `tabAttendance Request`.owner = '{user}')"

@@ -4,6 +4,7 @@ app_publisher = "admin"
 app_description = "All apps"
 app_email = "amal@moi.gov.sy"
 app_license = "mit"
+#boot_session = "moi_app.boot.add_cms_token"
 
 # Apps
 # ------------------
@@ -135,7 +136,7 @@ permission_query_conditions = {
     "Leave Application": "moi_app.permissions.leave_application_query_conditions",
     "Attendance Request": "moi_app.permissions.attendance_request_query_conditions",
 }
-#
+
 # has_permission = {
 # 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
@@ -162,9 +163,9 @@ doc_events = {
     "Leave Application": {
         "on_submit": "moi_app.utils.attach_pdf"
     },
-    # "Purchase Order": {
-    #     "on_update": "moi_app.utils.attach_pdf"
-    # },
+    "Purchase Order": {
+        "on_update": "moi_app.utils.attach_pdf"
+    },
     
 
 }

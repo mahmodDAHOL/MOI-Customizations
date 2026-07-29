@@ -1,0 +1,11 @@
+{
+ "doctype": "Page",
+ "module": "Moi App",
+ "name": "momc_website_statistics",
+ "page_name": "momc_website_statistics",
+ "title": "MoMC Website Statistics",
+ "standard": "Yes",
+ "roles": [
+  { "role": "statistics_viewer" }
+ ]
+}

@@ -15,7 +15,6 @@ frappe.ui.form.on("Leave Application", {
 				},
 				callback: function (r) {
 					if (r && r.message) {
-						console.log("dfdfdee"+r.message);
 						frm.set_value("total_leave_days", r.message);
 						frm.trigger("get_leave_balance");
 					}
@@ -23,48 +22,6 @@ frappe.ui.form.on("Leave Application", {
 			});
 		}
 	},
-	// leave_approver: function (frm) {
-	// 	if (frm.doc.leave_approver) {
-	// 		// Fetch the User document to get the linked employee
-	// 		frappe.call({
-	// 			method: "frappe.client.get",
-	// 			args: {
-	// 				doctype: "User",
-	// 				name: frm.doc.leave_approver
-	// 			},
-	// 			callback: function (r) {
-	// 				if (r.message && r.message.name) {
-	// 					// If user has linked employee, fetch the employee name
-	// 					frappe.call({
-	// 						method: "frappe.client.get",
-	// 						args: {
-	// 							doctype: "Employee",
-	// 							filters: {
-	// 								"user_id": r.message.name  // This field links Employee to User
-	// 							},
-	// 							fields: ["name", "employee_name"]
-	// 						},
-	// 						callback: function (emp_r) {
-	// 							console.log("r.message" + emp_r.message.employee_name)
-	// 							if (emp_r.message) {
-	// 								frm.set_value("leave_approver_name", emp_r.message.employee_name);
-	// 							} else {
-	// 								// Fallback to user full name if employee fetch fails
-	// 								frm.set_value("leave_approver_name", frappe.user.full_name(frm.doc.leave_approver));
-	// 							}
-	// 						}
-	// 					});
-	// 				} else {
-	// 					// If no employee linked, use user's full name
-	// 					frm.set_value("leave_approver_name", frappe.user.full_name(frm.doc.leave_approver));
-	// 				}
-	// 			}
-	// 		});
-	// 	} else {
-	// 		// Clear the field if leave_approver is empty
-	// 		frm.set_value("leave_approver_name", "");
-	// 	}
-	// },
 })
 
 

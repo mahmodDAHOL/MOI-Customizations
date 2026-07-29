@@ -1,0 +1,11 @@
+{
+ "doctype": "Page",
+ "module": "Moi App",
+ "name": "momc_admin_panel",
+ "page_name": "momc_admin_panel",
+ "title": "MoMC Admin Panel",
+ "standard": "Yes",
+ "roles": [
+  { "role": "momc_cms_admin" }
+ ]
+}

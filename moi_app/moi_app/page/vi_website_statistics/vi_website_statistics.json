@@ -1,0 +1,11 @@
+{
+ "doctype": "Page",
+ "module": "Moi App",
+ "name": "vi_website_statistics",
+ "page_name": "vi_website_statistics",
+ "title": "Visual Identity Website Statistics",
+ "standard": "Yes",
+ "roles": [
+  { "role": "statistics_viewer" }
+ ]
+}
