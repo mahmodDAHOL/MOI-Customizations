@@ -1,0 +1,565 @@
+[
+ {
+  "cards": [
+   {
+    "card": "اجازات",
+    "parent": "اجازات",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   }
+  ],
+  "chart_options": null,
+  "charts": [
+   {
+    "chart": "Attendance Count",
+    "parent": "اجازات",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Full"
+   }
+  ],
+  "dashboard_name": "اجازات",
+  "docstatus": 0,
+  "doctype": "Dashboard",
+  "is_default": 0,
+  "is_standard": 1,
+  "modified": "2026-02-10 14:40:16.718902",
+  "module": "MOI",
+  "name": "اجازات"
+ },
+ {
+  "cards": [
+   {
+    "card": "Approved Claims (This Month)",
+    "parent": "Tasks",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   },
+   {
+    "card": "فريد",
+    "parent": "Tasks",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   },
+   {
+    "card": "ttt",
+    "parent": "Tasks",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   }
+  ],
+  "chart_options": null,
+  "charts": [
+   {
+    "chart": "Task Summary",
+    "parent": "Tasks",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Full"
+   },
+   {
+    "chart": "Task Rate",
+    "parent": "Tasks",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   }
+  ],
+  "dashboard_name": "Tasks",
+  "docstatus": 0,
+  "doctype": "Dashboard",
+  "is_default": 0,
+  "is_standard": 0,
+  "modified": "2025-10-14 13:05:17.074052",
+  "module": "MOI",
+  "name": "Tasks"
+ },
+ {
+  "cards": [
+   {
+    "card": "All Tasks#",
+    "parent": "TEST0...",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   }
+  ],
+  "chart_options": null,
+  "charts": [
+   {
+    "chart": "Project Summary",
+    "parent": "TEST0...",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Full"
+   },
+   {
+    "chart": "Task Summary",
+    "parent": "TEST0...",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Full"
+   }
+  ],
+  "dashboard_name": "TEST0...",
+  "docstatus": 0,
+  "doctype": "Dashboard",
+  "is_default": 0,
+  "is_standard": 0,
+  "modified": "2026-02-10 14:40:16.672022",
+  "module": "MOI",
+  "name": "TEST0..."
+ },
+ {
+  "cards": [
+   {
+    "card": "All Tasks#",
+    "parent": "Top Management Dashboard",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   },
+   {
+    "card": "Completed Tasks#",
+    "parent": "Top Management Dashboard",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   },
+   {
+    "card": "OverDue All Tasks#",
+    "parent": "Top Management Dashboard",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   }
+  ],
+  "chart_options": null,
+  "charts": [
+   {
+    "chart": null,
+    "parent": "Top Management Dashboard",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "Execution Performance Indicators",
+    "parent": "Top Management Dashboard",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   }
+  ],
+  "dashboard_name": "Top Management Dashboard",
+  "docstatus": 0,
+  "doctype": "Dashboard",
+  "is_default": 0,
+  "is_standard": 0,
+  "modified": "2026-02-10 14:40:16.335763",
+  "module": "MOI",
+  "name": "Top Management Dashboard"
+ },
+ {
+  "cards": [],
+  "chart_options": null,
+  "charts": [
+   {
+    "chart": "Employees by Status",
+    "parent": "HRHR",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "Employees by Age",
+    "parent": "HRHR",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "TEST",
+    "parent": "HRHR",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   }
+  ],
+  "dashboard_name": "HRHR",
+  "docstatus": 0,
+  "doctype": "Dashboard",
+  "is_default": 0,
+  "is_standard": 1,
+  "modified": "2026-02-10 14:40:16.912170",
+  "module": "MOI",
+  "name": "HRHR"
+ },
+ {
+  "cards": [],
+  "chart_options": null,
+  "charts": [
+   {
+    "chart": "Operational Plan Indicators",
+    "parent": "Project Management Dashboard",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Full"
+   },
+   {
+    "chart": "Execution Performance Indicators",
+    "parent": "Project Management Dashboard",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Full"
+   },
+   {
+    "chart": "Supervision and Execution Indicators - Tasks by Supervisor",
+    "parent": "Project Management Dashboard",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Full"
+   },
+   {
+    "chart": "Supervision and Execution Indicators - Task and Project Participants",
+    "parent": "Project Management Dashboard",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Full"
+   },
+   {
+    "chart": "Supervision and Execution Indicators - Tasks by Department",
+    "parent": "Project Management Dashboard",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "Supervision and Execution Indicators - Tasks by Priority",
+    "parent": "Project Management Dashboard",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "Supervision and Execution Indicators - Weighted Progress",
+    "parent": "Project Management Dashboard",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Full"
+   },
+   {
+    "chart": "v",
+    "parent": "Project Management Dashboard",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   }
+  ],
+  "dashboard_name": "Project Management Dashboard",
+  "docstatus": 0,
+  "doctype": "Dashboard",
+  "is_default": 0,
+  "is_standard": 0,
+  "modified": "2026-02-10 14:40:16.752886",
+  "module": "MOI",
+  "name": "Project Management Dashboard"
+ },
+ {
+  "cards": [],
+  "chart_options": null,
+  "charts": [
+   {
+    "chart": "Project Summary",
+    "parent": "Project",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Full"
+   },
+   {
+    "chart": "Task Summary",
+    "parent": "Project",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   }
+  ],
+  "dashboard_name": "Project",
+  "docstatus": 0,
+  "doctype": "Dashboard",
+  "is_default": 0,
+  "is_standard": 1,
+  "modified": "2026-02-10 14:40:16.871674",
+  "module": "MOI",
+  "name": "Project"
+ },
+ {
+  "cards": [
+   {
+    "card": "All Tasks#",
+    "parent": "Tasks Status Dashboard",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   },
+   {
+    "card": "Completed Tasks#",
+    "parent": "Tasks Status Dashboard",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   },
+   {
+    "card": "Open All Tasks#",
+    "parent": "Tasks Status Dashboard",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   },
+   {
+    "card": "OverDue All Tasks#",
+    "parent": "Tasks Status Dashboard",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   },
+   {
+    "card": "Cancelled All Tasks#",
+    "parent": "Tasks Status Dashboard",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   },
+   {
+    "card": "Pending Tasks#",
+    "parent": "Tasks Status Dashboard",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   },
+   {
+    "card": "Working Tasks#",
+    "parent": "Tasks Status Dashboard",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   }
+  ],
+  "chart_options": null,
+  "charts": [
+   {
+    "chart": "Project Summary",
+    "parent": "Tasks Status Dashboard",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "Task Summary",
+    "parent": "Tasks Status Dashboard",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "Task Rate",
+    "parent": "Tasks Status Dashboard",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "المهام المنجزة",
+    "parent": "Tasks Status Dashboard",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "Project Task",
+    "parent": "Tasks Status Dashboard",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Full"
+   }
+  ],
+  "dashboard_name": "Tasks Status Dashboard",
+  "docstatus": 0,
+  "doctype": "Dashboard",
+  "is_default": 1,
+  "is_standard": 1,
+  "modified": "2026-02-10 14:40:16.508734",
+  "module": "MOI",
+  "name": "Tasks Status Dashboard"
+ },
+ {
+  "cards": [
+   {
+    "card": "Total Present (This Month)",
+    "parent": "Attendance",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   },
+   {
+    "card": "Total Absent (This Month)",
+    "parent": "Attendance",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   },
+   {
+    "card": "Late Entry (This Month)",
+    "parent": "Attendance",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   },
+   {
+    "card": "Early Exit (This Month)",
+    "parent": "Attendance",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   }
+  ],
+  "chart_options": null,
+  "charts": [
+   {
+    "chart": "Attendance Count",
+    "parent": "Attendance",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Full"
+   },
+   {
+    "chart": "Timesheet Activity Breakup",
+    "parent": "Attendance",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "Department wise Timesheet Hours",
+    "parent": "Attendance",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "Shift Assignment Breakup",
+    "parent": "Attendance",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "الحضور والغياب",
+    "parent": "Attendance",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   }
+  ],
+  "dashboard_name": "Attendance",
+  "docstatus": 0,
+  "doctype": "Dashboard",
+  "is_default": 0,
+  "is_standard": 1,
+  "modified": "2026-02-10 14:40:16.815752",
+  "module": "MOI",
+  "name": "Attendance"
+ },
+ {
+  "cards": [
+   {
+    "card": "Total Employees",
+    "parent": "Human Resource",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   },
+   {
+    "card": "New Hires (This Year)",
+    "parent": "Human Resource",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   },
+   {
+    "card": "Employee Exits (This Year)",
+    "parent": "Human Resource",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   },
+   {
+    "card": "Employees Joining (This Quarter)",
+    "parent": "Human Resource",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   },
+   {
+    "card": "Employees Relieving (This Quarter)",
+    "parent": "Human Resource",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   },
+   {
+    "card": "123",
+    "parent": "Human Resource",
+    "parentfield": "cards",
+    "parenttype": "Dashboard"
+   }
+  ],
+  "chart_options": null,
+  "charts": [
+   {
+    "chart": "Hiring vs Attrition Count",
+    "parent": "Human Resource",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Full"
+   },
+   {
+    "chart": "Employees by Age",
+    "parent": "Human Resource",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Full"
+   },
+   {
+    "chart": "Gender Diversity Ratio",
+    "parent": "Human Resource",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "Employees by Type",
+    "parent": "Human Resource",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "Employees by Grade",
+    "parent": "Human Resource",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "Designation Wise Employee Count",
+    "parent": "Human Resource",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "Department Wise Employee Count",
+    "parent": "Human Resource",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   },
+   {
+    "chart": "Employees by Status",
+    "parent": "Human Resource",
+    "parentfield": "charts",
+    "parenttype": "Dashboard",
+    "width": "Half"
+   }
+  ],
+  "dashboard_name": "Human Resource",
+  "docstatus": 0,
+  "doctype": "Dashboard",
+  "is_default": 0,
+  "is_standard": 1,
+  "modified": "2026-02-10 14:40:16.595893",
+  "module": "MOI",
+  "name": "Human Resource"
+ }
+]

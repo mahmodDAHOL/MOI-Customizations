@@ -1,0 +1,24 @@
+{
+    "content": null,
+    "creation": "2025-11-25 09:38:51.201713",
+    "docstatus": 0,
+    "doctype": "Page",
+    "idx": 0,
+    "modified": "2025-11-25 09:38:51.201713",
+    "modified_by": "Administrator",
+    "module": "MOI",
+    "name": "my-tasks",
+    "owner": "Administrator",
+    "page_name": "my-tasks",
+    "roles": [
+        {},
+        {
+            "role": "All"
+        }
+    ],
+    "script": null,
+    "standard": "Yes",
+    "style": null,
+    "system_page": 0,
+    "title": "My Tasks"
+}

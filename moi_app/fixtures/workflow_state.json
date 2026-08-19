@@ -1,0 +1,965 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-12-28 13:56:59.360639",
+  "name": "HR_Check",
+  "style": "",
+  "workflow_state_name": "HR_Check"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-12-28 13:58:38.076589",
+  "name": "Waiting_NOC",
+  "style": "",
+  "workflow_state_name": "Waiting_NOC"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-12-28 13:58:51.912754",
+  "name": "Recomended",
+  "style": "",
+  "workflow_state_name": "Recomended"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-12-29 10:08:39.540705",
+  "name": "manage review",
+  "style": "",
+  "workflow_state_name": "manage review"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-12-09 13:58:46.966871",
+  "name": "Return 4 Correction",
+  "style": "",
+  "workflow_state_name": "Return 4 Correction"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-08-17 10:57:27.878770",
+  "name": "Received",
+  "style": "",
+  "workflow_state_name": "Received"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-08-17 12:00:24.514621",
+  "name": "Archived",
+  "style": "Success",
+  "workflow_state_name": "Archived"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-08-17 11:00:13.203333",
+  "name": "Forwarded to Department",
+  "style": "",
+  "workflow_state_name": "Forwarded to Department"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-12-28 13:57:26.321530",
+  "name": "HR_Review",
+  "style": "",
+  "workflow_state_name": "HR_Review"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-02-03 12:30:01.600325",
+  "name": "Reviewed By Asset Manager",
+  "style": "",
+  "workflow_state_name": "Reviewed By Asset Manager"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-06-29 13:02:02.196322",
+  "name": "On Hold",
+  "style": "",
+  "workflow_state_name": "On Hold"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-19 09:33:37.471041",
+  "name": "Information Review",
+  "style": "Info",
+  "workflow_state_name": "Information Review"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-19 09:33:37.490466",
+  "name": "Needs More Information",
+  "style": "Warning",
+  "workflow_state_name": "Needs More Information"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-19 09:33:37.492626",
+  "name": "Under Analysis",
+  "style": "Info",
+  "workflow_state_name": "Under Analysis"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-19 09:33:37.494579",
+  "name": "Under Evaluation",
+  "style": "Info",
+  "workflow_state_name": "Under Evaluation"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-19 09:33:37.496497",
+  "name": "Deferred",
+  "style": "Warning",
+  "workflow_state_name": "Deferred"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-19 09:33:37.499792",
+  "name": "Converted to Project",
+  "style": "Success",
+  "workflow_state_name": "Converted to Project"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-19 09:33:37.501992",
+  "name": "Referred for Execution",
+  "style": "Success",
+  "workflow_state_name": "Referred for Execution"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-19 11:32:50.593418",
+  "name": "Send Notification",
+  "style": "",
+  "workflow_state_name": "Send Notification"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-26 20:43:32.807643",
+  "name": "Superseded",
+  "style": "Inverse",
+  "workflow_state_name": "Superseded"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-17 23:19:14.856940",
+  "name": "Requirements Approved",
+  "style": "",
+  "workflow_state_name": "Requirements Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-17 23:19:14.866640",
+  "name": "User Accepted",
+  "style": "",
+  "workflow_state_name": "User Accepted"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-17 23:19:14.870573",
+  "name": "Final Accepted",
+  "style": "",
+  "workflow_state_name": "Final Accepted"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-17 23:19:14.872466",
+  "name": "Ready for Deployment",
+  "style": "",
+  "workflow_state_name": "Ready for Deployment"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-17 23:19:14.874418",
+  "name": "Deployed",
+  "style": "",
+  "workflow_state_name": "Deployed"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-17 23:19:14.876530",
+  "name": "Handover to Support",
+  "style": "",
+  "workflow_state_name": "Handover to Support"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-17 23:19:14.878379",
+  "name": "Under Support",
+  "style": "",
+  "workflow_state_name": "Under Support"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-26 20:43:32.794083",
+  "name": "Published",
+  "style": "Success",
+  "workflow_state_name": "Published"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-02-21 12:20:10.664622",
+  "name": "Ready for Closure",
+  "style": "",
+  "workflow_state_name": "Ready for Closure"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-17 23:19:14.840526",
+  "name": "Requirements Analysis",
+  "style": "",
+  "workflow_state_name": "Requirements Analysis"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-31 20:33:15.587294",
+  "name": "Pending Requirements Approval",
+  "style": "Info",
+  "workflow_state_name": "Pending Requirements Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-17 23:19:14.861038",
+  "name": "Internal Testing",
+  "style": "",
+  "workflow_state_name": "Internal Testing"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-31 20:33:15.581878",
+  "name": "Pending User Acceptance",
+  "style": "Info",
+  "workflow_state_name": "Pending User Acceptance"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-17 23:19:14.864795",
+  "name": "Changes Required",
+  "style": "",
+  "workflow_state_name": "Changes Required"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-31 20:33:15.576033",
+  "name": "Pending Final Acceptance",
+  "style": "Info",
+  "workflow_state_name": "Pending Final Acceptance"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-01-05 09:52:44.711292",
+  "name": "Disapproved",
+  "style": "",
+  "workflow_state_name": "Disapproved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-08-13 11:10:46.570074",
+  "name": "Send",
+  "style": "",
+  "workflow_state_name": "Send"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-17 23:19:14.858790",
+  "name": "In Development",
+  "style": "",
+  "workflow_state_name": "In Development"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-02-21 12:20:44.247983",
+  "name": "Approved / Closed",
+  "style": "",
+  "workflow_state_name": "Approved / Closed"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-12-09 11:51:47.222517",
+  "name": "Open & Approved",
+  "style": "",
+  "workflow_state_name": "Open & Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-01-04 22:39:08.596830",
+  "name": "Manager Recommended",
+  "style": "",
+  "workflow_state_name": "Manager Recommended"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-12-09 11:21:59.803585",
+  "name": "Filled",
+  "style": "",
+  "workflow_state_name": "Filled"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-05-07 12:56:17.135643",
+  "name": "Rejcted By Purchase Manager",
+  "style": "",
+  "workflow_state_name": "Rejcted By Purchase Manager"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-05-11 10:45:11.979743",
+  "name": "Awaiting Assignment",
+  "style": "",
+  "workflow_state_name": "Awaiting Assignment"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-05-11 10:45:38.548236",
+  "name": "Approved and Scheduled",
+  "style": "",
+  "workflow_state_name": "Approved and Scheduled"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-05-19 13:39:10.150776",
+  "name": "Cancelled by Employee",
+  "style": "",
+  "workflow_state_name": "Cancelled by Employee"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-01-04 23:01:48.682363",
+  "name": "HR Reviewed",
+  "style": "",
+  "workflow_state_name": "HR Reviewed"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-01-04 23:07:21.845257",
+  "name": "Accepted",
+  "style": "",
+  "workflow_state_name": "Accepted"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-05-11 10:44:50.422699",
+  "name": "Awaiting Approval",
+  "style": "",
+  "workflow_state_name": "Awaiting Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-19 11:33:23.455913",
+  "name": "Notified",
+  "style": "",
+  "workflow_state_name": "Notified"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-31 20:32:29.076520",
+  "name": "Rejected by Storekeeper",
+  "style": "Danger",
+  "workflow_state_name": "Rejected by Storekeeper"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-01-05 09:36:55.344335",
+  "name": "Issued",
+  "style": "",
+  "workflow_state_name": "Issued"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-01-27 10:57:03.612836",
+  "name": "Prepared",
+  "style": "",
+  "workflow_state_name": "Prepared"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-12-28 13:56:37.974820",
+  "name": "Submitted",
+  "style": "",
+  "workflow_state_name": "Submitted"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-26 10:19:56.606658",
+  "name": "Failed",
+  "style": "Danger",
+  "workflow_state_name": "Failed"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-26 10:19:56.611183",
+  "name": "Rolled Back",
+  "style": "Danger",
+  "workflow_state_name": "Rolled Back"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-26 10:19:56.595449",
+  "name": "Verified",
+  "style": "Success",
+  "workflow_state_name": "Verified"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-26 10:19:56.582251",
+  "name": "Scheduled",
+  "style": "Info",
+  "workflow_state_name": "Scheduled"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-26 10:19:56.512247",
+  "name": "Submitted for Assessment",
+  "style": "Warning",
+  "workflow_state_name": "Submitted for Assessment"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-31 20:32:29.045003",
+  "name": "Reject Circulation Abroad",
+  "style": "Danger",
+  "workflow_state_name": "Reject Circulation Abroad"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-31 20:33:15.551329",
+  "name": "Pending Verification",
+  "style": "Info",
+  "workflow_state_name": "Pending Verification"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-26 10:19:56.570098",
+  "name": "Under Assessment",
+  "style": "Warning",
+  "workflow_state_name": "Under Assessment"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-06-08 10:44:59.721163",
+  "name": "Approved by Storekeeper",
+  "style": "Success",
+  "workflow_state_name": "Approved by Storekeeper"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-07 12:48:37.471544",
+  "name": "Approved Circulation Abroad",
+  "style": "Primary",
+  "workflow_state_name": "Approved Circulation Abroad"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-31 20:33:15.597269",
+  "name": "Pending Review",
+  "style": "Info",
+  "workflow_state_name": "Pending Review"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-01 11:48:42.404974",
+  "name": "Replied",
+  "style": "Warning",
+  "workflow_state_name": "Replied"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-03-09 11:36:54.637904",
+  "name": "Sent To Minister",
+  "style": "",
+  "workflow_state_name": "Sent To Minister"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-31 20:32:29.090086",
+  "name": "Rejected By Discussion Committee",
+  "style": "Danger",
+  "workflow_state_name": "Rejected By Discussion Committee"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-02-22 08:26:37.787421",
+  "name": "Approved By Discussion Committee",
+  "style": "",
+  "workflow_state_name": "Approved By Discussion Committee"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-31 20:32:29.085012",
+  "name": "Rejected By Purchase Manager",
+  "style": "Danger",
+  "workflow_state_name": "Rejected By Purchase Manager"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-07-21 14:10:28.107916",
+  "name": "Cancelled",
+  "style": "Danger",
+  "workflow_state_name": "Cancelled"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-26 10:20:23.338390",
+  "name": "In progress",
+  "style": "Info",
+  "workflow_state_name": "In progress"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-31 20:32:29.069125",
+  "name": "Reject Circulation Abroad - Auditor",
+  "style": "Danger",
+  "workflow_state_name": "Reject Circulation Abroad - Auditor"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-05-07 11:20:07.067991",
+  "name": "Approved By Purchase Manager",
+  "style": "",
+  "workflow_state_name": "Approved By Purchase Manager"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-07 12:36:22.144480",
+  "name": "Approved Circulation Abroad - Auditor",
+  "style": "Primary",
+  "workflow_state_name": "Approved Circulation Abroad - Auditor"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-07 12:48:14.562433",
+  "name": "Approved for Export Only",
+  "style": "Info",
+  "workflow_state_name": "Approved for Export Only"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-07 12:47:49.930987",
+  "name": "Approved with Conditions",
+  "style": "Warning",
+  "workflow_state_name": "Approved with Conditions"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-26 10:19:56.599868",
+  "name": "Closed",
+  "style": "Success",
+  "workflow_state_name": "Closed"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-31 20:32:29.063637",
+  "name": "Reject Printing",
+  "style": "Danger",
+  "workflow_state_name": "Reject Printing"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-05 10:33:48.789135",
+  "name": "Send for Rating",
+  "style": "Inverse",
+  "workflow_state_name": "Send for Rating"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-07 12:46:21.099775",
+  "name": "Approve for Printing",
+  "style": "Success",
+  "workflow_state_name": "Approve for Printing"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-01 11:48:15.204913",
+  "name": "Resolved",
+  "style": "Success",
+  "workflow_state_name": "Resolved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-07 12:36:06.348375",
+  "name": "Approved for Export Only - ِAuditor",
+  "style": "Inverse",
+  "workflow_state_name": "Approved for Export Only - ِAuditor"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-07 14:13:01.678328",
+  "name": "Approved with Conditions - ِAuditor",
+  "style": "Warning",
+  "workflow_state_name": "Approved with Conditions - ِAuditor"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-31 20:32:29.073159",
+  "name": "Reject Printing - Auditor",
+  "style": "Danger",
+  "workflow_state_name": "Reject Printing - Auditor"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-07 12:34:44.606533",
+  "name": "Approve for Printing - Auditor",
+  "style": "Success",
+  "workflow_state_name": "Approve for Printing - Auditor"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-31 20:32:29.094928",
+  "name": "Rejected By Finance",
+  "style": "Danger",
+  "workflow_state_name": "Rejected By Finance"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-05-13 16:05:25.165059",
+  "name": "Approved By Asset Manager",
+  "style": "",
+  "workflow_state_name": "Approved By Asset Manager"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-31 20:32:29.099978",
+  "name": "Rejected By Asset Manager",
+  "style": "Danger",
+  "workflow_state_name": "Rejected By Asset Manager"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-31 20:33:15.592438",
+  "name": "Pending Manager Approval",
+  "style": "Info",
+  "workflow_state_name": "Pending Manager Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-31 20:32:29.106229",
+  "name": "Rejected by manager",
+  "style": "Danger",
+  "workflow_state_name": "Rejected by manager"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-02-03 12:31:31.008554",
+  "name": "Approved  By Asset Manager",
+  "style": "",
+  "workflow_state_name": "Approved  By Asset Manager"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-07-21 14:08:46.239889",
+  "name": "Done",
+  "style": "Success",
+  "workflow_state_name": "Done"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "question-sign",
+  "modified": "2026-07-31 20:33:15.601908",
+  "name": "Pending",
+  "style": "Info",
+  "workflow_state_name": "Pending"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-02-03 12:24:40.726629",
+  "name": "Approved By Finance",
+  "style": "",
+  "workflow_state_name": "Approved By Finance"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-26 20:43:32.782315",
+  "name": "Under review",
+  "style": "Warning",
+  "workflow_state_name": "Under review"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-31 20:33:15.569685",
+  "name": "Pending Approval",
+  "style": "Info",
+  "workflow_state_name": "Pending Approval"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "remove",
+  "modified": "2026-07-31 20:32:29.112164",
+  "name": "Rejected",
+  "style": "Danger",
+  "workflow_state_name": "Rejected"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-06-08 10:41:32.699792",
+  "name": "Approved by manager",
+  "style": "Success",
+  "workflow_state_name": "Approved by manager"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-05-11 12:23:42.470887",
+  "name": "Sent To HR",
+  "style": "Inverse",
+  "workflow_state_name": "Sent To HR"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-05-14 09:42:52.426561",
+  "name": "Completed",
+  "style": "Success",
+  "workflow_state_name": "Completed"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-26 10:19:56.475195",
+  "name": "Draft",
+  "style": "Primary",
+  "workflow_state_name": "Draft"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-05-11 12:22:40.917271",
+  "name": "Sent To Manager",
+  "style": "Info",
+  "workflow_state_name": "Sent To Manager"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-07-21 14:06:39.512272",
+  "name": "Working",
+  "style": "Info",
+  "workflow_state_name": "Working"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "ok-sign",
+  "modified": "2025-05-05 16:49:50.395972",
+  "name": "Approved",
+  "style": "Success",
+  "workflow_state_name": "Approved"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2026-07-31 20:31:04.351248",
+  "name": "Open",
+  "style": "Primary",
+  "workflow_state_name": "Open"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Workflow State",
+  "icon": "",
+  "modified": "2025-07-21 14:03:27.835594",
+  "name": "Not Saved",
+  "style": "Warning",
+  "workflow_state_name": "Not Saved"
+ }
+]

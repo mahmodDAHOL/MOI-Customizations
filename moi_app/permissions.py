@@ -141,10 +141,10 @@ def material_request_query_condition(user=None):
     if set(frappe.get_roles(user)) & approver_roles:
         return ""  # No restriction - see all Material Requests
     if "Asset manager" in frappe.get_roles(user):
-        return f"`tabMaterial Request`.custom_is_all_items_are_assets = '1'"
+        return f"(`tabMaterial Request`.custom_is_all_items_are_assets = '1' OR `tabMaterial Request`.owner = '{user}')"
 
     if "Shared-Services-Stock" in frappe.get_roles(user):
-        return f"`tabMaterial Request`.custom_is_all_items_are_assets = '0'"
+        return f"(`tabMaterial Request`.custom_is_all_items_are_assets = '0' OR `tabMaterial Request`.owner = '{user}')"
 
     # Regular users: see own requests + requests for their subordinates
     employee = frappe.db.get_value("Employee", {"user_id": user}, "name")

@@ -877,12 +877,646 @@ def convert_table_to_text(html_content):
     
     return '<br>'.join(text_output)
 
+"""Workflow progress bar — server side.
 
+Exposes a workflow as a *graph* (states + transitions) rather than a single
+flattened path, so the client can render branches, merges and rejection loops
+for any DocType that has an active Workflow.
+"""
+
+import ast
+import json
 import re
+
+import frappe
+from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
+from frappe.utils import cint
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+
+@frappe.whitelist()
+def get_workflow_doctypes():
+    """Every DocType that currently has an active Workflow.
+
+    The client binds a form handler to each of these, so the progress bar works
+    on any workflow-enabled DocType without being hard-coded to one.
+    """
+    doctypes = frappe.get_all(
+        "Workflow",
+        filters={"is_active": 1},
+        pluck="document_type",
+    )
+    # A DocType can legitimately have more than one Workflow row; only one is
+    # active at a time, but de-duplicate defensively.
+    return sorted({dt for dt in doctypes if dt})
+
+
+def boot_workflow_doctypes(bootinfo):
+    """Ship the workflow DocType list in boot.
+
+    Wire this up in hooks.py so the client binds its form handlers before any
+    form renders, instead of racing the form load with an extra round trip::
+
+        extend_bootinfo = "moi_app.utils.boot_workflow_doctypes"
+    """
+    bootinfo.workflow_doctypes = get_workflow_doctypes()
+
+
+@frappe.whitelist()
+def get_workflow_graph(doctype, docname=None, only_relevant=1):
+    """Return the workflow graph for `doctype`, as it applies to one document.
+
+    Keeps every state and every transition, so branching ("Approve" vs
+    "Reject"), merges and loop-backs all survive to the client. Layout is the
+    client's job; this is pure data.
+
+    With `only_relevant` (the default) the graph is pruned to the paths that
+    can actually apply to `docname`: transitions whose condition is false for
+    this record are dropped, along with any state that becomes unreachable as a
+    result. Pass ``only_relevant=0`` to get the full workflow definition.
+
+    Returns None when the DocType has no active workflow.
+    """
+    only_relevant = cint(only_relevant)
+    workflow_name = get_workflow_name(doctype)
+    if not workflow_name:
+        return None
+
+    workflow = frappe.get_cached_doc("Workflow", workflow_name)
+    state_field = workflow.workflow_state_field or "workflow_state"
+
+    doc = None
+    current_state = None
+    if docname:
+        doc = frappe.get_doc(doctype, docname)
+        # Reading a document's workflow implies reading the document.
+        doc.check_permission("read")
+        current_state = doc.get(state_field)
+
+    # `style` lives on the Workflow State master, not on the child row, so it is
+    # fetched separately — one query for the whole workflow.
+    styles = _state_styles([row.state for row in workflow.states])
+
+    states = [
+        {
+            "name": row.state,
+            "doc_status": cint(row.doc_status),
+            "style": styles.get(row.state, ""),
+            "allow_edit": row.allow_edit,
+            "order": idx,
+        }
+        for idx, row in enumerate(workflow.states)
+    ]
+
+    known_states = {row["name"] for row in states}
+
+    transitions = []
+    for row in workflow.transitions:
+        # A transition can reference a state that was removed from the States
+        # table; skip it rather than emitting a dangling edge.
+        if row.state not in known_states or row.next_state not in known_states:
+            continue
+        transitions.append(
+            {
+                "from_state": row.state,
+                "to_state": row.next_state,
+                "action": row.action,
+                "allowed": row.allowed,
+                "condition": row.condition or "",
+                # "available to act on right now" vs "on this record's path"
+                "satisfied": _condition_satisfied(row, doc),
+                "applies": _condition_applies(row, doc, state_field),
+            }
+        )
+
+    history = _state_history(
+        doctype, docname, state_field, states, current_state, transitions
+    )
+    _mark_traversed(transitions, history, current_state)
+
+    pruned = False
+    if docname and only_relevant:
+        states, transitions = _prune_to_relevant(
+            states, transitions, current_state, history
+        )
+        pruned = True
+
+    _annotate_phases(states, transitions, current_state, history)
+    states = [st for st in states if st["phase"] != "other"]
+    return {
+        "workflow": workflow_name,
+        "doctype": doctype,
+        "docname": docname,
+        "state_field": state_field,
+        "current_state": current_state,
+        "states": states,
+        "transitions": transitions,
+        "history": history,
+        "pruned": pruned,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _state_styles(state_names):
+    """Map each Workflow State name to its `style` (Success, Danger, Warning...).
+
+    The style is the workflow designer's own colour intent, which the client
+    uses in preference to guessing from the state's name. It is stored on the
+    Workflow State master — the `states` child rows do not carry it.
+    """
+    names = [name for name in set(state_names) if name]
+    if not names:
+        return {}
+
+    rows = frappe.get_all(
+        "Workflow State",
+        filters={"name": ("in", names)},
+        fields=["name", "style"],
+    )
+    return {row.name: row.style or "" for row in rows}
+
+
+# Text that makes a comparison about *who is acting* rather than about the
+# record. Such a comparison is false for every step the document has not
+# reached yet, so it says nothing about whether that step is on the path.
+_SESSION_MARKERS = ("frappe.session", "session.user", "frappe.user")
+
+
+def _mentions_session(node):
+    """Whether an expression node refers to the acting user."""
+    try:
+        text = ast.unparse(node).lower()
+    except Exception:
+        return False
+    return any(marker in text for marker in _SESSION_MARKERS)
+
+
+def _is_neutralised(node):
+    """Whether a node has already been reduced to the neutral ``True``."""
+    return isinstance(node, ast.Constant) and node.value is True
+
+
+class _NeutraliseSession(ast.NodeTransformer):
+    """Take the session-user test out of a condition, leaving the rest intact.
+
+    A session comparison is *dropped from* the boolean expression rather than
+    replaced by ``True`` inside it. Substituting the constant would make an
+    ``or`` short-circuit — ``doc.total > 50000 or doc.approver ==
+    frappe.session.user`` would become ``... or True`` and never test the
+    record at all. Removing the clause leaves ``doc.total > 50000``, so the
+    record still decides in both ``and`` and ``or`` expressions.
+    """
+
+    def __init__(self):
+        self.changed = False
+
+    def visit_Compare(self, node):
+        if _mentions_session(node):
+            self.changed = True
+            return ast.copy_location(ast.Constant(value=True), node)
+        return self.generic_visit(node)
+
+    def visit_BoolOp(self, node):
+        # Children first, so session comparisons are already neutralised.
+        self.generic_visit(node)
+
+        kept = [value for value in node.values if not _is_neutralised(value)]
+        if not kept:
+            # Nothing but session tests — the whole clause is neutral.
+            return ast.copy_location(ast.Constant(value=True), node)
+        if len(kept) == 1:
+            return kept[0]
+
+        node.values = kept
+        return node
+
+    def visit_UnaryOp(self, node):
+        self.generic_visit(node)
+        # `not <session test>` must stay neutral rather than flip to False.
+        if isinstance(node.op, ast.Not) and _is_neutralised(node.operand):
+            return ast.copy_location(ast.Constant(value=True), node)
+        return node
+
+
+def _neutralise_session(condition):
+    """Rewrite `condition` with the session-user test removed.
+
+    The remaining record-data expression decides whether the branch belongs on
+    this record's path::
+
+        doc.total > 5 and doc.approver == frappe.session.user  ->  doc.total > 5
+        doc.total > 5 or  doc.approver == frappe.session.user  ->  doc.total > 5
+        doc.approver == frappe.session.user                    ->  True
+
+    Note the ``or`` case: the clause is dropped, not replaced by ``True``, so
+    the record half is still tested instead of being short-circuited away.
+
+    Returns ``(rewritten, changed)``. On a malformed expression the original
+    string is returned unchanged.
+    """
+    if not condition:
+        return condition, False
+    try:
+        tree = ast.parse(condition.strip(), mode="eval")
+    except SyntaxError:
+        return condition, False
+
+    transformer = _NeutraliseSession()
+    tree = transformer.visit(tree)
+    if not transformer.changed:
+        return condition, False
+
+    ast.fix_missing_locations(tree)
+    try:
+        return ast.unparse(tree), True
+    except Exception:
+        return condition, False
+
+
+def _condition_applies(transition, doc, state_field):
+    """Whether this branch belongs on the record's path.
+
+    Distinct from :func:`_condition_satisfied`, which answers "is this action
+    available right now". Here every session-user comparison is taken as true
+    and the remainder of the expression is evaluated, so:
+
+    * ``doc.grand_total > 50000`` — decided by the record; prunes when false.
+    * ``doc.approver == frappe.session.user`` — becomes ``True``; always kept,
+      otherwise the path would stop at the current state.
+    * ``doc.total > 5 and doc.approver == frappe.session.user`` — becomes
+      ``doc.total > 5``; the record still decides.
+
+    A condition referring to the workflow state field describes *where* the
+    document is rather than which way it goes, so it never prunes.
+    """
+    condition = transition.condition
+    if not condition:
+        return True
+    if state_field and state_field.lower() in condition.lower():
+        return True
+
+    rewritten, changed = _neutralise_session(condition)
+    if not changed:
+        # No session reference — the plain evaluation already answers this.
+        return _condition_satisfied(transition, doc)
+
+    return _condition_satisfied(frappe._dict(condition=rewritten), doc)
+
+
+def _reachable(transitions, origin, reverse=False):
+    """States reachable from `origin`, following edges forwards or backwards.
+
+    Returns a set that always contains `origin` itself, or an empty set when
+    `origin` is falsy.
+    """
+    if not origin:
+        return set()
+
+    adjacency = {}
+    for transition in transitions:
+        source, target = transition["from_state"], transition["to_state"]
+        if reverse:
+            source, target = target, source
+        adjacency.setdefault(source, []).append(target)
+
+    seen = {origin}
+    queue = [origin]
+    while queue:
+        node = queue.pop(0)
+        for nxt in adjacency.get(node, []):
+            if nxt not in seen:
+                seen.add(nxt)
+                queue.append(nxt)
+    return seen
+
+
+def _annotate_phases(states, transitions, current_state, history):
+    """Tag each state as past / current / future, so the client need not guess.
+
+    Derived from the graph rather than from Version history, which is missing
+    entirely on DocTypes that do not track changes.
+    """
+    ahead = _reachable(transitions, current_state) - {current_state}
+    behind = _reachable(transitions, current_state, reverse=True) - {current_state}
+
+    for state in states:
+        name = state["name"]
+        if name == current_state:
+            state["phase"] = "current"
+        elif name in history:
+            state["phase"] = "past"
+        elif name in ahead:
+            # In a loop a state can sit on both sides; "still to come" is the
+            # safer read than claiming it is already done.
+            state["phase"] = "future"
+        elif name in behind:
+            state["phase"] = "past"
+        else:
+            state["phase"] = "other"
+
+
+def _mark_traversed(transitions, history, current_state):
+    """Flag the edges this document actually moved along.
+
+    A traversed edge is kept even when its condition no longer holds: once a
+    document leaves Draft the condition that let it leave is often false, and
+    erasing that edge would erase the path the record genuinely took.
+    """
+    for transition in transitions:
+        source = history.get(transition["from_state"])
+        target_seen = (
+            transition["to_state"] in history or transition["to_state"] == current_state
+        )
+        transition["traversed"] = bool(source is not None and target_seen)
+
+
+def _prune_to_relevant(states, transitions, current_state, history):
+    """Reduce the graph to the paths that can apply to this document.
+
+    Kept:
+      * every state the document has already been through,
+      * the state it sits on now,
+      * everything still reachable from there through transitions whose
+        conditions currently hold.
+
+    Dropped: branches gated behind a condition that is false for this record —
+    e.g. a "grand_total > 50000" approval path on a 5,000 document — and any
+    state left stranded once those edges go.
+
+    Pruning uses `applies` (see :func:`_condition_applies`), not `satisfied`:
+    session-user comparisons count as true so the rest of the expression
+    decides. A branch gated purely on who is acting is therefore always kept —
+    otherwise the graph would stop at the current state rather than showing the
+    rest of the path.
+    """
+    # Drop an edge only when the record's own data rules it out.
+    live = [t for t in transitions if t.get("traversed") or t.get("applies")]
+
+    # Never strand the document. If every way out of the current state was
+    # pruned, keep them: a path that dead-ends where the record happens to sit
+    # is worse than showing a branch that may not apply.
+    if current_state:
+        exits = [t for t in transitions if t["from_state"] == current_state]
+        if exits and not [t for t in live if t["from_state"] == current_state]:
+            live = live + exits
+
+    relevant = set(history)
+    if current_state:
+        relevant.add(current_state)
+
+    # Ahead: walk forward from wherever the document sits (or the opening
+    # state, for a record that has not entered the workflow yet).
+    origin = current_state or (states[0]["name"] if states else None)
+    relevant |= _reachable(live, origin)
+
+    # Behind: walk backwards from the current state. Without this the middle of
+    # the path disappears on a record that has reached a terminal state — there
+    # is nothing ahead to walk to, so every intermediate step would rest on
+    # Version history alone, and that is absent whenever the DocType does not
+    # track changes. The whole transition list is used rather than `live`: the
+    # record demonstrably arrived here, so some inbound route exists and must
+    # be drawn even if its condition no longer holds.
+    relevant |= _reachable(transitions, current_state, reverse=True)
+
+    kept_states = [s for s in states if s["name"] in relevant]
+    kept_names = {s["name"] for s in kept_states}
+
+    # Re-index so step numbers stay contiguous after states are removed. The
+    # relative order is preserved, which is what the client's layering uses.
+    for idx, state in enumerate(kept_states):
+        state["order"] = idx
+
+    kept_transitions = [
+        t for t in live if t["from_state"] in kept_names and t["to_state"] in kept_names
+    ]
+
+    return kept_states, kept_transitions
+
+
+def _condition_satisfied(transition, doc):
+    """Whether a transition's condition currently holds.
+
+    A transition with no condition is always satisfied. Conditions are
+    evaluated through Frappe's own sandbox, never a bare eval().
+    """
+    if not transition.condition:
+        return True
+    if doc is None:
+        # Without a document there is nothing to evaluate against; treat the
+        # edge as possible so the full graph still renders on a new form.
+        return True
+    try:
+        return bool(is_transition_condition_satisfied(transition, doc))
+    except Exception:
+        # A broken condition should not blank out the whole progress bar.
+        frappe.log_error(
+            title="Workflow progress: condition evaluation failed",
+            message=frappe.get_traceback(),
+        )
+        return False
+
+
+def _comment_history(doctype, docname, transitions, first_state):
+    """Reconstruct who entered each state by replaying the comment trail.
+
+    ``apply_workflow`` records a Comment of type "Workflow" for every action
+    taken, carrying the acting user and the time. The comment text is the
+    *translated* action name, so it cannot be matched against the transition
+    table on a multilingual site; instead the trail is replayed in order,
+    advancing one transition per comment.
+
+    The replay stops at the first fork it cannot resolve rather than guessing
+    which branch was taken — a wrong name against a step is worse than none.
+    """
+    if not first_state:
+        return {}
+
+    try:
+        rows = frappe.get_all(
+            "Comment",
+            filters={
+                "reference_doctype": doctype,
+                "reference_name": docname,
+                "comment_type": "Workflow",
+            },
+            fields=["owner", "creation", "content"],
+            order_by="creation asc",
+        )
+    except Exception:
+        return {}
+
+    outgoing = {}
+    for transition in transitions:
+        outgoing.setdefault(transition["from_state"], []).append(transition)
+
+    entered = {}
+    position = first_state
+
+    for row in rows:
+        options = outgoing.get(position) or []
+        target = None
+
+        if len(options) == 1:
+            # Only one way out — the comment can only mean this step.
+            target = options[0]["to_state"]
+        else:
+            # A fork: fall back to the action name, which may be translated.
+            content = (row.content or "").strip()
+            matches = [
+                o for o in options if (o.get("action") or "").strip() == content
+            ]
+            if len(matches) == 1:
+                target = matches[0]["to_state"]
+
+        if not target:
+            break
+
+        entered[target] = {"user": row.owner, "on": str(row.creation)}
+        position = target
+
+    return entered
+
+
+def _workflow_action_history(doctype, docname):
+    """Who completed the action raised at each state.
+
+    Frappe raises a Workflow Action whenever a document enters a state that has
+    outgoing transitions, and stamps `completed_by` when somebody acts on it.
+    These rows exist regardless of whether the DocType tracks changes, so they
+    fill in the steps that Version history cannot account for.
+
+    Returns ``state -> {user, on}``. Several rows can exist for one state (one
+    per permitted user); ordering by `modified` means the row that actually
+    completed the step wins.
+    """
+    try:
+        rows = frappe.get_all(
+            "Workflow Action",
+            filters={
+                "reference_doctype": doctype,
+                "reference_name": docname,
+                "status": "Completed",
+            },
+            fields=["workflow_state", "completed_by", "modified"],
+            order_by="modified asc",
+        )
+    except Exception:
+        # Never let an unexpected schema take down the whole progress bar.
+        return {}
+
+    handled = {}
+    for row in rows:
+        if row.workflow_state and row.completed_by:
+            handled[row.workflow_state] = {
+                "user": row.completed_by,
+                "on": str(row.modified),
+            }
+    return handled
+
+
+def _state_history(
+    doctype, docname, state_field, states, current_state=None, transitions=None
+):
+    """Who moved the document into each state, and when.
+
+    Reads the Version rows Frappe writes on every field change. Returns a map
+    of ``state -> {user, on, seq}``. Permission on the parent document has
+    already been checked by the caller.
+    """
+    if not docname:
+        return {}
+
+    history = {}
+
+    stamps = frappe.db.get_value(
+        doctype,
+        docname,
+        ["owner", "creation", "modified_by", "modified"],
+        as_dict=True,
+    )
+
+    # The opening state is not a transition — it is the document's creation.
+    if stamps and states:
+        history[states[0]["name"]] = {
+            "user": stamps.owner,
+            "on": str(stamps.creation),
+            "seq": 0,
+        }
+
+    rows = frappe.get_all(
+        "Version",
+        filters={"ref_doctype": doctype, "docname": docname},
+        fields=["owner", "creation", "data"],
+        order_by="creation asc",
+    )
+
+    for row in rows:
+        try:
+            data = json.loads(row.data or "{}")
+        except (ValueError, TypeError):
+            continue
+        for change in data.get("changed") or []:
+            # change is [fieldname, old_value, new_value]
+            if len(change) >= 3 and change[0] == state_field and change[2]:
+                history[change[2]] = {
+                    "user": row.owner,
+                    "on": str(row.creation),
+                    "seq": len(history),
+                }
+
+    # Replaying the comment trail attributes the state each action *entered*,
+    # matching what Version records, so it is preferred over Workflow Action.
+    if states:
+        for state, entered in _comment_history(
+            doctype, docname, transitions or [], states[0]["name"]
+        ).items():
+            if state not in history:
+                history[state] = {
+                    "user": entered["user"],
+                    "on": entered["on"],
+                    "seq": len(history),
+                }
+
+    # Version rows only exist when the DocType tracks changes. Workflow Actions
+    # are written either way, so they fill in every step still missing. Note
+    # these attribute the state acted *from*, not the one entered.
+    for state, handled in _workflow_action_history(doctype, docname).items():
+        if state not in history:
+            history[state] = {
+                "user": handled["user"],
+                "on": handled["on"],
+                "seq": len(history),
+            }
+
+    # The document sits on `current_state` now, so that step should always be
+    # attributable. Nothing records the move while the action there is still
+    # open, so fall back to whoever last touched the document.
+    if current_state and current_state not in history and stamps:
+        history[current_state] = {
+            "user": stamps.modified_by,
+            "on": str(stamps.modified),
+            "seq": len(history),
+        }
+
+    return history
+
+
+# ---------------------------------------------------------------------------
+# Deprecated — kept so existing client scripts keep working
+# ---------------------------------------------------------------------------
+
 
 def normalize_state(state):
     """Normalize state for case-insensitive comparison"""
-    return state.lower().strip() if state else ''
+    return state.lower().strip() if state else ""
+
 
 def find_matching_state(existing_states, target_state):
     """Find a state in existing_states that matches target_state case-insensitively"""
@@ -892,26 +1526,24 @@ def find_matching_state(existing_states, target_state):
             return state
     return None
 
+
 def replace_state(result, old_state, new_state):
     """Replace old_state with new_state in workflow transitions (case-insensitive)"""
     updated_result = []
     old_normalized = normalize_state(old_state)
-    
+
     for state, next_states in result:
-        # Replace in current state
         current_state = new_state if normalize_state(state) == old_normalized else state
-        
-        # Replace in next states
+
         updated_next = []
         for next_state in next_states:
             if normalize_state(next_state) == old_normalized:
                 updated_next.append(new_state)
             else:
                 updated_next.append(next_state)
-        
+
         updated_result.append((current_state, tuple(updated_next)))
-    
-    # Remove duplicates if any (case-insensitive)
+
     seen_normalized = set()
     final_result = []
     for state, next_states in updated_result:
@@ -919,207 +1551,142 @@ def replace_state(result, old_state, new_state):
         if state_normalized not in seen_normalized:
             seen_normalized.add(state_normalized)
             final_result.append((state, next_states))
-    
+
     return final_result
+
+
+def get_complete_workflow_paths(ordered_transitions):
+    """Generate all complete paths from start states to end states."""
+    transitions_dict = {}
+    all_states = set()
+
+    for from_state, to_state in ordered_transitions:
+        transitions_dict.setdefault(from_state, []).append(to_state)
+        all_states.add(from_state)
+        all_states.add(to_state)
+
+    to_states = {to for _, to in ordered_transitions}
+    start_states = all_states - to_states
+
+    from_states = {from_state for from_state, _ in ordered_transitions}
+    end_states = all_states - from_states
+
+    def find_paths(current_state, path):
+        if current_state in end_states:
+            return [path + [current_state]]
+        if current_state not in transitions_dict:
+            return [path + [current_state]]
+
+        paths = []
+        for next_state in transitions_dict[current_state]:
+            if next_state not in path:  # Avoid cycles
+                paths.extend(find_paths(next_state, path + [current_state]))
+        return paths
+
+    all_paths = []
+    for start in start_states:
+        all_paths.extend(find_paths(start, []))
+
+    return all_paths
 
 
 @frappe.whitelist()
 def get_workflow_states(workflow_name, docname=None):
+    """DEPRECATED — use :func:`get_workflow_graph` instead.
+
+    Collapses the workflow into a single linear chain and hides rejection
+    states unless the document currently sits on one, so branches are lost.
+    Retained only so existing client scripts keep working.
     """
-    Get workflow states with filtering for rejection states (case-insensitive).
-    """
-    
-    workflow = frappe.get_doc('Workflow', workflow_name)
-    
-    # Get current workflow_state
+    workflow = frappe.get_doc("Workflow", workflow_name)
+
+    doc = None
     workflow_state = None
     doctype = workflow.document_type
     if doctype and docname:
         doc = frappe.get_doc(doctype, docname)
-        workflow_state = frappe.db.get_value(doctype, docname, 'workflow_state')
+        doc.check_permission("read")
+        workflow_state = doc.get(workflow.workflow_state_field or "workflow_state")
 
-    ordered_transitions = [(tran.state, tran.next_state) for tran in workflow.transitions 
-                            if tran.state == "Draft" or
-                                evaluate_condition(tran.condition, doc)]
+    ordered_transitions = [
+        (tran.state, tran.next_state)
+        for tran in workflow.transitions
+        if tran.state == "Draft" or _condition_satisfied(tran, doc)
+    ]
 
     flows = get_complete_workflow_paths(ordered_transitions)
-    # Remove duplicates from flows
-    unique_flows = []
-    for flow in flows:
-        if flow not in unique_flows:
-            unique_flows.append(flow)
 
     transitions = {}
     for flow in flows:
         for i in range(len(flow) - 1):
-            current = flow[i]
-            next_state = flow[i + 1]
-            
-            if current not in transitions:
-                transitions[current] = set()
-            transitions[current].add(next_state)
-    # Get all states
+            transitions.setdefault(flow[i], set()).add(flow[i + 1])
+
     all_states = set()
     for flow in flows:
         all_states.update(flow)
 
-    # Get state order from workflow.states
-    state_order = {}
-    for idx, state in enumerate(workflow.states):
-        state_order[state.state] = idx
-    
-    # Define rejection keywords (lowercase for case-insensitive matching)
-    rejection_pattern = re.compile(r'reject', re.IGNORECASE)
-    
+    state_order = {state.state: idx for idx, state in enumerate(workflow.states)}
+
+    rejection_pattern = re.compile(r"reject", re.IGNORECASE)
+
     def is_rejection_state(state):
-        """Check if a state is a rejection state (case-insensitive)"""
         return bool(rejection_pattern.search(state))
-    
-    # Filter states based on rejection rules
+
     filtered_states = set()
     for state in all_states:
         if is_rejection_state(state):
-            # Only include rejection state if it matches current workflow_state (case-insensitive)
-            if workflow_state and normalize_state(state) == normalize_state(workflow_state):
+            if workflow_state and normalize_state(state) == normalize_state(
+                workflow_state
+            ):
                 filtered_states.add(state)
         else:
-            # Always include non-rejection states
             filtered_states.add(state)
-    
-    # Build result
+
     result = []
     for state in sorted(filtered_states, key=lambda x: state_order.get(x, 999)):
         if state in transitions:
             filtered_next_states = set()
             for next_state in transitions[state]:
                 if is_rejection_state(next_state):
-                    if workflow_state and normalize_state(next_state) == normalize_state(workflow_state):
+                    if workflow_state and normalize_state(
+                        next_state
+                    ) == normalize_state(workflow_state):
                         filtered_next_states.add(next_state)
                 else:
                     filtered_next_states.add(next_state)
-            
-            sorted_next_states = sorted(filtered_next_states, key=lambda x: state_order.get(x, 999))
+
+            sorted_next_states = sorted(
+                filtered_next_states, key=lambda x: state_order.get(x, 999)
+            )
             result.append((state, tuple(sorted_next_states)))
         else:
-            result.append((state, tuple()))
+            result.append((state, ()))
 
-    # Handle rejection states replacement
     rejection_states = [state for state, _ in result if is_rejection_state(state)]
     if rejection_states:
         rejection_state = rejection_states[0]
-        
-        # Find matching approve state (case-insensitive)
-        approve_state = None
-        approve_pattern = rejection_pattern.sub('Approved', rejection_state, count=1)
-        
-        # Try to find matching approve state in all_states
+
+        approve_pattern = rejection_pattern.sub("Approved", rejection_state, count=1)
         approve_state = find_matching_state(all_states, approve_pattern)
-        
+
         if not approve_state:
-            # Try alternative patterns
-            for pattern in [rejection_state.replace('Rejected', 'Approved'),
-                           rejection_state.replace('rejected', 'approved'),
-                           rejection_state.replace('REJECTED', 'APPROVED'),
-                           'Approved']:
+            for pattern in [
+                rejection_state.replace("Rejected", "Approved"),
+                rejection_state.replace("rejected", "approved"),
+                rejection_state.replace("REJECTED", "APPROVED"),
+                "Approved",
+            ]:
                 approve_state = find_matching_state(all_states, pattern)
                 if approve_state:
                     break
-        
+
         if approve_state:
-            new_result = replace_state(result, approve_state, rejection_state)
-            return new_result
+            return replace_state(result, approve_state, rejection_state)
+
     return result
 
 
-def evaluate_condition(condition, doc):
-    """
-    Evaluate condition - session.user comparisons always True
-    Handles AND/OR by splitting the condition
-    """
-    
-    # Helper to evaluate a single condition part
-    def eval_part(part):
-        part = part.strip()
-        if 'frappe.session.user' in part or 'frappe.user.session' in part:
-            # Session user comparison always returns True for ==
-            if '==' in part and '!=' not in part:
-                return True
-            elif '!=' in part:
-                return False
-            return True
-        # Evaluate non-session conditions
-        return eval(part, {'doc': doc, 'frappe': frappe})
-    
-    # Split by AND
-    if ' and ' in condition.lower():
-        parts = re.split(r'\s+and\s+', condition, flags=re.IGNORECASE)
-        return all(eval_part(part) for part in parts)
-    
-    # Split by OR
-    elif ' or ' in condition.lower():
-        parts = re.split(r'\s+or\s+', condition, flags=re.IGNORECASE)
-        return any(eval_part(part) for part in parts)
-    
-    # Single condition
-    else:
-        return eval_part(condition)
 
-
-def get_complete_workflow_paths(ordered_transitions):
-    
-    """
-    Generate all complete workflow paths from start states to end states
-    
-    Args:
-        ordered_transitions: List of tuples [(from_state, to_state), ...]
-    
-    Returns:
-        List of complete paths from start to end
-    """
-    # Build adjacency list
-    transitions_dict = {}
-    all_states = set()
-    
-    for from_state, to_state in ordered_transitions:
-        if from_state not in transitions_dict:
-            transitions_dict[from_state] = []
-        transitions_dict[from_state].append(to_state)
-        all_states.add(from_state)
-        all_states.add(to_state)
-    
-    # Find start states (states that never appear as 'to' except as 'from')
-    to_states = {to for _, to in ordered_transitions}
-    start_states = all_states - to_states
-    
-    # Find end states (states that never appear as 'from')
-    from_states = {from_state for from_state, _ in ordered_transitions}
-    end_states = all_states - from_states
-    
-    # Generate all paths from start to end
-    def find_paths(current_state, path):
-        """Recursively find all paths from current_state to end states"""
-        paths = []
-        
-        if current_state in end_states:
-            return [path + [current_state]]
-        
-        if current_state not in transitions_dict:
-            return [path + [current_state]]
-        
-        for next_state in transitions_dict[current_state]:
-            if next_state not in path:  # Avoid cycles
-                extended_paths = find_paths(next_state, path + [current_state])
-                paths.extend(extended_paths)
-        
-        return paths
-    
-    # Get all paths from all start states
-    all_paths = []
-    for start in start_states:
-        paths = find_paths(start, [])
-        all_paths.extend(paths)
-    
-    return all_paths
 
 @frappe.whitelist()
 def get_reserved_slots(start_date=None, end_date=None):
@@ -1326,3 +1893,40 @@ def apply_dynamic_stamp(doc_name, stamp_text):
             "status": "error",
             "message": f"حدث خطأ أثناء تطبيق الختم: {str(e)}"
         }
+
+import frappe
+import json
+
+
+@frappe.whitelist()
+def create_doc_in_state(doctype, doc, target_workflow_state=None):
+    """Create a doc and place it directly into a target workflow state.
+
+    Frappe blocks:
+      - inserting with a workflow_state != initial state, and
+      - saving a transition that isn't defined (e.g. "Not Saved" -> "Pending Review").
+
+    So we insert WITHOUT workflow_state, then set it via a direct DB update,
+    which does NOT run validate / workflow checks.
+    """
+    if isinstance(doc, str):
+        doc = json.loads(doc)
+
+    # Never send workflow_state on insert -> avoids "Not Saved" transition error
+    doc.pop("workflow_state", None)
+    doc["doctype"] = doctype
+
+    d = frappe.get_doc(doc)
+    d.insert(ignore_permissions=True)
+
+    if target_workflow_state:
+        # Direct DB UPDATE -> bypasses workflow transition validation
+        frappe.db.set_value(
+            doctype,
+            d.name,
+            "workflow_state",
+            target_workflow_state,
+            update_modified=False,
+        )
+
+    return d.name

@@ -1,0 +1,28 @@
+[
+ {
+  "background_color": null,
+  "button_gradients": 0,
+  "button_rounded_corners": 1,
+  "button_shadows": 0,
+  "custom": 0,
+  "custom_overrides": "/* RTL Desktop Phone Picker Fix */\nhtml[dir=\"rtl\"] .phone-picker {\n    position: fixed !important;\n    top: auto !important;\n    left: auto !important;\n    right: 0 !important;\n    z-index: 9999 !important;\n    width: 300px !important;\n    max-height: 350px !important;\n    overflow-y: auto !important;\n    background: #fff !important;\n    border: 1px solid #d1d8dd !important;\n    border-radius: 8px !important;\n    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;\n}\n\nhtml[dir=\"rtl\"] .phone-picker .phone-wrapper {\n    direction: rtl !important;\n    text-align: right !important;\n    padding: 8px 12px !important;\n}\n\nhtml[dir=\"rtl\"] .phone-picker .search-phones {\n    direction: rtl !important;\n}\n\nhtml[dir=\"rtl\"] .phone-picker .search-phones input {\n    text-align: right !important;\n    padding-right: 32px !important;\n    padding-left: 8px !important;\n}\n\nhtml[dir=\"rtl\"] .phone-picker .search-phone {\n    right: 8px !important;\n    left: auto !important;\n}",
+  "custom_scss": null,
+  "dark_color": null,
+  "docstatus": 0,
+  "doctype": "Website Theme",
+  "font_properties": "wght:400;500;600;700;800",
+  "font_size": null,
+  "google_font": null,
+  "ignored_apps": [],
+  "js": "frappe.ready(() => {\n    if (document.documentElement.dir !== 'rtl') return;\n\n    // 1. Watch for dynamically created phone pickers & move them to <body>\n    const observer = new MutationObserver((mutations) => {\n        for (const mutation of mutations) {\n            for (const node of mutation.addedNodes) {\n                if (node.nodeType === 1 && node.classList?.contains('phone-picker')) {\n                    if (node.parentElement !== document.body) {\n                        document.body.appendChild(node);\n                    }\n                }\n            }\n        }\n    });\n    observer.observe(document.body, { childList: true, subtree: true });\n\n    // 2. Reposition correctly when clicking the phone field or flag\n    $(document).on('click', '.selected-phone, input[data-fieldtype=\"Phone\"]', function() {\n        setTimeout(() => {\n            const $picker = $('.phone-picker:visible');\n            if ($picker.length) {\n                const $input = $(this).closest('.control-input').find('input[data-fieldtype=\"Phone\"]');\n                const rect = $input[0].getBoundingClientRect();\n                \n                $picker.css({\n                    position: 'fixed',\n                    top: (rect.bottom + 5) + 'px',\n                    right: (window.innerWidth - rect.right) + 'px',\n                    left: 'auto',\n                    zIndex: 9999\n                });\n            }\n        }, 100);\n    });\n\n    // 3. Close picker when clicking outside\n    $(document).on('click', function(e) {\n        if (!$(e.target).closest('.phone-picker, .selected-phone, input[data-fieldtype=\"Phone\"]').length) {\n            $('.phone-picker').hide();\n        }\n    });\n\n    // 4. Hide picker on desk scroll (prevents floating mismatch)\n    $('.layout-main-section, .form-layout').on('scroll', () => {\n        $('.phone-picker').hide();\n    });\n});",
+  "light_color": null,
+  "modified": "2026-04-28 14:27:33.824269",
+  "module": "MOI",
+  "name": "Standard",
+  "primary_color": null,
+  "text_color": null,
+  "theme": "Standard",
+  "theme_scss": "$enable-shadows: false;\n$enable-gradients: false;\n$enable-rounded: true;\n\n// Bootstrap Variable Overrides\n/* RTL Desktop Phone Picker Fix */\nhtml[dir=\"rtl\"] .phone-picker {\n    position: fixed !important;\n    top: auto !important;\n    left: auto !important;\n    right: 0 !important;\n    z-index: 9999 !important;\n    width: 300px !important;\n    max-height: 350px !important;\n    overflow-y: auto !important;\n    background: #fff !important;\n    border: 1px solid #d1d8dd !important;\n    border-radius: 8px !important;\n    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;\n}\n\nhtml[dir=\"rtl\"] .phone-picker .phone-wrapper {\n    direction: rtl !important;\n    text-align: right !important;\n    padding: 8px 12px !important;\n}\n\nhtml[dir=\"rtl\"] .phone-picker .search-phones {\n    direction: rtl !important;\n}\n\nhtml[dir=\"rtl\"] .phone-picker .search-phones input {\n    text-align: right !important;\n    padding-right: 32px !important;\n    padding-left: 8px !important;\n}\n\nhtml[dir=\"rtl\"] .phone-picker .search-phone {\n    right: 8px !important;\n    left: auto !important;\n}\n\n// Import themes from installed apps\n@import \"frappe/public/scss/website.bundle\";\n@import \"erpnext/public/scss/website\";\n\n\n\n// Custom Theme\n\n\n:root {\n\t}\n",
+  "theme_url": "/files/website_theme/standard_style.css"
+ }
+]

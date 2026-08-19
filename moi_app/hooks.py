@@ -28,7 +28,8 @@ app_license = "mit"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/moi_app/css/moi_app.css"
 # app_include_js = "/assets/moi_app/js/moi_app.js"
-
+app_include_js = "moi_app.bundle.js"
+extend_bootinfo = "moi_app.utils.boot_workflow_doctypes"
 # include js, css files in header of web template
 # web_include_css = "/assets/moi_app/css/moi_app.css"
 # web_include_js = "/assets/moi_app/js/moi_app.js"
@@ -48,6 +49,7 @@ doctype_js = {"Leave Application" : "public/js/leave_application.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
+
 
 # Svg Icons
 # ------------------
@@ -164,7 +166,10 @@ doc_events = {
         "on_submit": "moi_app.utils.attach_pdf"
     },
     "Purchase Order": {
-        "on_update": "moi_app.utils.attach_pdf"
+        "on_submit": "moi_app.utils.attach_pdf"
+    },
+    "Request Permit": {
+        "on_submit": "moi_app.utils.attach_pdf"
     },
     
 
@@ -274,130 +279,130 @@ scheduler_events = {
 # }
 
 
-# import frappe
+import frappe
 
-# def get_moi_doctypes():
-#     """Get all DocTypes belonging to the 'MOI' module (case-insensitive)."""
-#     return [
-#         d for d in frappe.get_all(
-#             "DocType",
-#             filters=[["module", "=", "MOI"]],
-#             pluck="name"
-#         )
-#     ]
+def get_moi_doctypes():
+    """Get all DocTypes belonging to the 'MOI' module (case-insensitive)."""
+    return [
+        d for d in frappe.get_all(
+            "DocType",
+            filters=[["module", "=", "MOI"]],
+            pluck="name"
+        )
+    ]
 
-# def get_moi_reports():
-#     """Get Reports linked to MOI doctypes or explicitly in MOI module."""
-#     moi_doctypes = get_moi_doctypes()
-#     # Reports can be in module, or reference MOI doctypes
-#     return [
-#         r for r in frappe.get_all(
-#             "Report",
-#             filters=[
-#                 ["module", "=", "MOI"],
-#                 ["ref_doctype", "in", moi_doctypes + [""]]
-#             ],
-#             or_filters=[
-#                 ["module", "=", "MOI"],
-#                 ["ref_doctype", "in", moi_doctypes]
-#             ],
-#             pluck="name"
-#         )
-#     ]
+def get_moi_reports():
+    """Get Reports linked to MOI doctypes or explicitly in MOI module."""
+    moi_doctypes = get_moi_doctypes()
+    # Reports can be in module, or reference MOI doctypes
+    return [
+        r for r in frappe.get_all(
+            "Report",
+            filters=[
+                ["module", "=", "MOI"],
+                ["ref_doctype", "in", moi_doctypes + [""]]
+            ],
+            or_filters=[
+                ["module", "=", "MOI"],
+                ["ref_doctype", "in", moi_doctypes]
+            ],
+            pluck="name"
+        )
+    ]
 
-# # 🔑 MAIN FIXTURES — MOI APP ONLY
-# fixtures = [
+# 🔑 MAIN FIXTURES — MOI APP ONLY
+fixtures = [
     
-#     # ✅ DocTypes in MOI module
-#     {
-#         "doctype": "DocType",
-#         "filters": [["module", "=", "MOI"]]
-#     },
+    # ✅ DocTypes in MOI module
+    {
+        "doctype": "DocType",
+        "filters": [["module", "=", "MOI"]]
+    },
 
-#     # ✅ Configurations WITH `module` field (v14+)
-#     {
-#         "doctype": "Property Setter",
-#         "filters": [["module", "=", "MOI"]]
-#     },
-#     {
-#         "doctype": "Client Script",  # Replaces "Client Script"
-#         "filters": [["module", "=", "MOI"]]
-#     },
-#     {
-#         "doctype": "Server Script",
-#         "filters": [["module", "=", "MOI"]]
-#     },
-#     {
-#         "doctype": "Custom Field",
-#         "filters": [["module", "=", "MOI"]]
-#     },
+    # ✅ Configurations WITH `module` field (v14+)
+    {
+        "doctype": "Property Setter",
+        "filters": [["module", "=", "MOI"]]
+    },
+    {
+        "doctype": "Client Script",  # Replaces "Client Script"
+        "filters": [["module", "=", "MOI"]]
+    },
+    {
+        "doctype": "Server Script",
+        "filters": [["module", "=", "MOI"]]
+    },
+    {
+        "doctype": "Custom Field",
+        "filters": [["module", "=", "MOI"]]
+    },
 
-#     # ✅ Print Formats (filter by MOI doctypes + non-standard)
-#     {
-#         "doctype": "Print Format",
-#         "filters": [
-#              ["module", "=", "MOI"],
-#             # ["standard", "=", "No"]
-#         ]
-#     },
+    # ✅ Print Formats (filter by MOI doctypes + non-standard)
+    {
+        "doctype": "Print Format",
+        "filters": [
+             ["module", "=", "MOI"],
+            # ["standard", "=", "No"]
+        ]
+    },
 
-#     # ✅ Workspaces — match by module (if set) OR content (doctype names)
-#     {
-#         "dt": "Workspace",
-#         "filters": [
-#             ["company", "=", "Ministry of Information"]
-#         ]
-#     },
+    # ✅ Workspaces — match by module (if set) OR content (doctype names)
+    {
+        "dt": "Workspace",
+        "filters": [
+            ["company", "=", "Ministry of Information"]
+        ]
+    },
 
-#     # ✅ Workflows & States (linked via document_type)
-#     {
-#         "doctype": "Workflow",
-#     },
-
-
-#     # ✅ Reports (custom & query-based)
-#     {
-#         "doctype": "Report",
-#         "filters": [ ["module", "=", "MOI"]]
-#     },
+    # ✅ Workflows & States (linked via document_type)
+    {
+        "doctype": "Workflow",
+    },
 
 
+    # ✅ Reports (custom & query-based)
+    {
+        "doctype": "Report",
+        "filters": [ ["module", "=", "MOI"]]
+    },
 
-#     # ✅ Website Pages & Themes (match by name/module)
-#     {
-#         "doctype": "Web Page",
-#         "filters": [ ["module", "=", "MOI"]]
-#     },
-#     {
-#         "doctype": "Page",
-#         "filters": [ ["module", "=", "MOI"]]
-#     },
-#     {
-#         "doctype": "Web Form",
-#         "filters": [ ["module", "=", "MOI"]]
-#     },
-#     {
-#         "doctype": "Website Theme",
-#         "filters": [ ["module", "=", "MOI"]]
-#     },
 
-#     # ✅ Bonus: Add missing customizations commonly used in MOI:
+
+    # ✅ Website Pages & Themes (match by name/module)
+    {
+        "doctype": "Web Page",
+        "filters": [ ["module", "=", "MOI"]]
+    },
+    {
+        "doctype": "Page",
+        "filters": [ ["module", "=", "MOI"]]
+    },
+    {
+        "doctype": "Web Form",
+        "filters": [ ["module", "=", "MOI"]]
+    },
+    {
+        "doctype": "Website Theme",
+        "filters": [ ["module", "=", "MOI"]]
+    },
+
+    # ✅ Bonus: Add missing customizations commonly used in MOI:
     
-#     # Custom Roles (if role name contains MOI)
-#     {
-#         "dt": "Role",
-#     },
-#     {
-#         "dt": "Workflow State",
-#     },
+    # Custom Roles (if role name contains MOI)
+    {
+        "dt": "Role",
+    },
+    {
+        "dt": "Workflow State",
+    },
 
-#     {
-#         "dt": "Dashboard",
-#         "filters": [ ["module", "=", "MOI"]]
-#     },
-#     {
-#         "dt": "User Permission",
-#     },
+    {
+        "dt": "Dashboard",
+        "filters": [ ["module", "=", "MOI"]]
+    },
+    {
+        "dt": "User Permission",
+    },
 
-# ]
+]
 
